@@ -5,36 +5,36 @@
 	<key>IDESourceControlProjectFavoriteDictionaryKey</key>
 	<false/>
 	<key>IDESourceControlProjectIdentifier</key>
-	<string>F603D34E-8987-41A1-8496-5552BE582B81</string>
+	<string>18C73BB9-98EE-41DF-A5B4-E98C957A4AB3</string>
 	<key>IDESourceControlProjectName</key>
 	<string>DoubleAgent</string>
 	<key>IDESourceControlProjectOriginsDictionary</key>
 	<dict>
-		<key>1750818D-7F7D-4BE9-9C21-2004ACB3EA13</key>
-		<string>https://github.com/ChromaPDX/Agent_OF_iOS.git</string>
+		<key>BD91F980-174E-45CC-9689-6562632718E5</key>
+		<string>https://github.com/ChromaPDX/AgentOFiOS.git</string>
 	</dict>
 	<key>IDESourceControlProjectPath</key>
 	<string>DoubleAgent.xcodeproj/project.xcworkspace</string>
 	<key>IDESourceControlProjectRelativeInstallPathDictionary</key>
 	<dict>
-		<key>1750818D-7F7D-4BE9-9C21-2004ACB3EA13</key>
+		<key>BD91F980-174E-45CC-9689-6562632718E5</key>
 		<string>../..</string>
 	</dict>
 	<key>IDESourceControlProjectURL</key>
-	<string>https://github.com/ChromaPDX/Agent_OF_iOS.git</string>
+	<string>https://github.com/ChromaPDX/AgentOFiOS.git</string>
 	<key>IDESourceControlProjectVersion</key>
 	<integer>110</integer>
 	<key>IDESourceControlProjectWCCIdentifier</key>
-	<string>1750818D-7F7D-4BE9-9C21-2004ACB3EA13</string>
+	<string>BD91F980-174E-45CC-9689-6562632718E5</string>
 	<key>IDESourceControlProjectWCConfigurations</key>
 	<array>
 		<dict>
 			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
 			<string>public.vcs.git</string>
 			<key>IDESourceControlWCCIdentifierKey</key>
-			<string>1750818D-7F7D-4BE9-9C21-2004ACB3EA13</string>
+			<string>BD91F980-174E-45CC-9689-6562632718E5</string>
 			<key>IDESourceControlWCCName</key>
-			<string>Agent_OF_iOS</string>
+			<string>AgentOFiOS</string>
 		</dict>
 	</array>
 </dict>

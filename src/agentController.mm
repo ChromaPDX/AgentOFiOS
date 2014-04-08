@@ -59,7 +59,23 @@ void agentController::setup() {
     increment.setAnchorPercent(.5, .5);
     decrement.loadImage("decrement.png");
     decrement.setAnchorPercent(.5, .5);
+    primaries[0] = ofColor(255, 0, 210);    // pink  0
+    primaries[1] = ofColor(17, 188, 61);    // green  1
+    primaries[2] = ofColor(178, 44, 255);   // purple  2
+    primaries[3] = ofColor(255, 96, 0);     // orange   3
+    primaries[4] = ofColor(255, 0, 0);      // red       4
+    primaries[5] = ofColor(255, 174, 0);    // yellow     5
+    primaries[6] = ofColor(44, 138, 255);   // light blue  6
     
+    primaryColor = ofRandom(0, 7);
+    complementaries[0*3+0] = 1;     complementaries[0*3+1] = 5;     complementaries[0*3+2] = 6;
+    complementaries[1*3+0] = 0;     complementaries[1*3+1] = 3;     complementaries[1*3+2] = 5;
+    complementaries[2*3+0] = 0;     complementaries[2*3+1] = 3;     complementaries[2*3+2] = 5;
+    complementaries[3*3+0] = 6;     complementaries[3*3+1] = 2;     complementaries[3*3+2] = 5;
+    complementaries[4*3+0] = 6;     complementaries[4*3+1] = 2;     complementaries[4*3+2] = 5;
+    complementaries[5*3+0] = 2;     complementaries[5*3+1] = 0;     complementaries[5*3+2] = 6;
+    complementaries[6*3+0] = 0;     complementaries[6*3+1] = 5;     complementaries[6*3+2] = 2;
+
     //ofSetSmoothLighting(true);
 }
 
@@ -372,7 +388,7 @@ void agentController::execute(string gesture){
     }
     
     // clear recorded sensor array before every turn  // TODO separate between events which need recording and those which don't
-    for(int i = 0; i < SENSOR_DATA_ARRAY_SIZE; i++)
+    for(int i = 0; i < SENSOR_DATA_ARRAY_SIZE*3; i++)
         recordedSensorData[i] = 1.;
     
     ofLogNotice("RECORD MODE") << "RECORDING: " + gesture;
@@ -419,7 +435,7 @@ void agentController::update() {
             if(index < 0) index = 0;
             if(index >= SENSOR_DATA_ARRAY_SIZE) index = SENSOR_DATA_ARRAY_SIZE-1;
             float maxScale = 4*getMaxSensorScale() + 1.;
-            recordedSensorData[index] = maxScale;
+            recordedSensorData[(currentTurn-1)*SENSOR_DATA_ARRAY_SIZE + index] = maxScale;
         }
         
         if(gameState == GameStateGameOver){
@@ -848,7 +864,8 @@ void agentController::drawLoginScreen() {
 
 void agentController::draw() {
     
-    ofClear(30, 30, 30);
+    ofClear(primaries[primaryColor]);
+    
     if(gameState == GameStateLogin){
         drawAnimatedSphereBackground();
     }
@@ -881,6 +898,12 @@ void agentController::draw() {
             fontMedium.drawString(backString,width*.5 - fontMedium.stringWidth(backString)*.5,height*.75 - fontMedium.stringHeight(backString)/2.);
         }
     }
+
+// white bar at bottom
+    //ofSetColor(primaries[complementaries[primaryColor*3+0]]);
+    ofSetColor(255, 255, 255);
+    ofDrawPlane(width*.5, height-125, width, 250);
+    printf("TURN %d\n",currentTurn);
     
     if (gameState == GameStatePlaying || gameState == GameStateDeciding || gameState == GameStateGameOver) {
         
@@ -907,7 +930,6 @@ void agentController::draw() {
             
             drawInGameBackground();
             
-            //ofSetColor(6, 179, 210);   // light blue motion shape
             ofSetLineWidth(3.);
             
             // for drawing a circle path
@@ -915,9 +937,35 @@ void agentController::draw() {
             int resolution;
             float deltaAngle;
             float angle;
+            ////////////////////////////////////////////////////////
+            // break out
+            if(currentTurn > 1){
+                for(int i = 1; i < currentTurn; i++){
+                    ofSetColor(primaries[complementaries[primaryColor*3+(i-1)]]);
+                    //ofSetColor(6, 140, 210, 100);   // blue motion shape
+                    //ofSetColor(74,193,255, 50); // blue motion shape border
+                    ofFill();
+                    ofBeginShape();
+                    outerRadius = centerX*.55;
+                    deltaAngle = TWO_PI / (float)SENSOR_DATA_ARRAY_SIZE;
+                    angle = 0;
+                    float turnProgress = 1.0;
+                    for(int i = 0; i < SENSOR_DATA_ARRAY_SIZE; i++){
+                        if((float)i/SENSOR_DATA_ARRAY_SIZE < turnProgress){
+                            float x = centerX + outerRadius * sin(angle) * recordedSensorData[(i-1)*SENSOR_DATA_ARRAY_SIZE + i];
+                            float y = centerY + outerRadius * -cos(angle) * recordedSensorData[(i-1)*SENSOR_DATA_ARRAY_SIZE + i];
+                            ofVertex(x,y);
+                            angle += deltaAngle;
+                        }
+                    }
+                    ofEndShape();
+                }
+            }
+            ////////////////////////////////////////////////////////
             
             if(turnState == TurnStateAction || turnState == TurnStateActionSuccess || turnState == TurnStateWaiting){
-                ofSetColor(6, 140, 210, 100);   // blue motion shape
+                ofSetColor(primaries[complementaries[primaryColor*3+(currentTurn-1)]]);
+                //ofSetColor(6, 140, 210, 100);   // blue motion shape
                 //ofSetColor(74,193,255, 50); // blue motion shape border
                 ofFill();
                 ofBeginShape();
@@ -927,8 +975,8 @@ void agentController::draw() {
                 float turnProgress = (float)(ofGetElapsedTimeMillis() - turnTime) / ACTION_TIME;   // from 0 to 1
                 for(int i = 0; i < SENSOR_DATA_ARRAY_SIZE; i++){
                     if((float)i/SENSOR_DATA_ARRAY_SIZE < turnProgress){
-                        float x = centerX + outerRadius * sin(angle) * recordedSensorData[i];
-                        float y = centerY + outerRadius * -cos(angle) * recordedSensorData[i];
+                        float x = centerX + outerRadius * sin(angle) * recordedSensorData[(currentTurn-1)*SENSOR_DATA_ARRAY_SIZE + i];
+                        float y = centerY + outerRadius * -cos(angle) * recordedSensorData[(currentTurn-1)*SENSOR_DATA_ARRAY_SIZE + i];
                         ofVertex(x,y);
                         angle += deltaAngle;
                     }
@@ -993,7 +1041,7 @@ void agentController::draw() {
     if (!isServer && !isClient) {  // if not server or client
         drawLoginScreen();
     }
-    
+    ofSetColor(0, 0, 0, 255);
     if(gameState == GameStateLogin){
         lowerTextLine1 = "INTEL WELCOMES YOU TO";
         lowerTextLine2 = "DOUBLE AGENT";
@@ -1047,15 +1095,15 @@ void agentController::draw() {
         }
     }
     
-    ofSetColor(60, 60, 60, 255);
+    ofSetColor(0, 0, 0, 255);
     fontSmall.drawString(lowerTextLine1, 60, centerY+centerY*.66);
-    ofSetColor(180, 180, 180, 255);
+    ofSetColor(0, 0, 0, 255);
     fontSmall.drawString(lowerTextLine2, 60, centerY+centerY*.66+40);
     fontSmall.drawString(lowerTextLine3, 60, centerY+centerY*.66+80);
     
     if (connectedAgents > 1){   // CONNECTED AGENTS
         string count = connectedAgentsStrings[connectedAgents];//ofToString(connectedAgents);
-        ofSetColor(200,200,200);
+        ofSetColor(0,0,0);
         font.drawString(count, centerX-font.stringWidth(count)/2.,ofGetHeight() - font.stringHeight(count));
     }
 }

@@ -107,7 +107,7 @@ private:
 	ofVec3f accel, normAccel;
     ofVec3f filteredAccel;
     ofVec3f userAccelerationArray[SENSOR_DATA_ARRAY_SIZE];
-    float recordedSensorData[SENSOR_DATA_ARRAY_SIZE];
+    float recordedSensorData[SENSOR_DATA_ARRAY_SIZE * 3];
     int accelIndex = 0;  // filter array index
     float getMaxSensorScale(); // grab max value from deltaOrientation;
     //updated sensor
@@ -171,6 +171,9 @@ private:
     float screenScale;
     
     // OF / UI / UX
+    ofColor primaries[7];   // 7 colors
+    int complementaries[21]; // indexes of primaries[] of complements to the primaries
+    int primaryColor;       // what is your color this round?
     int mouseX, mouseY;
     int centerX, centerY;  // screen Coords
     int width, height;

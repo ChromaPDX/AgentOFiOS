@@ -65,7 +65,7 @@ void testApp::setup(){
     }
     if (motionManager){
         
-        if(motionManager.isDeviceMotionAvailable){
+        if([motionManager isDeviceMotionAvailable]){
             
             ofLogNotice("CORE_MOTION") << "MOTION MANAGER IS AVAILABLE";
             
