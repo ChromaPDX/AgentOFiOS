@@ -47,6 +47,7 @@
 		D51BE0B8188DF21B00359972 /* reticle_compass.png in Resources */ = {isa = PBXBuildFile; fileRef = D51BE0B6188DF21B00359972 /* reticle_compass.png */; };
 		D577837A188F12B80038156E /* inside_circle.png in Resources */ = {isa = PBXBuildFile; fileRef = D5778379188F12B80038156E /* inside_circle.png */; };
 		D577837C188F206F0038156E /* reticle_inside.png in Resources */ = {isa = PBXBuildFile; fileRef = D577837B188F206F0038156E /* reticle_inside.png */; };
+		D5961C4318F882E300978303 /* AgentView.mm in Sources */ = {isa = PBXBuildFile; fileRef = D5961C4118F882E300978303 /* AgentView.mm */; };
 		D5D387C31891E3E200208CD3 /* inside_circle_w_fade.png in Resources */ = {isa = PBXBuildFile; fileRef = D5D387C21891E3E200208CD3 /* inside_circle_w_fade.png */; };
 		E41D3ED713B38FB500A75A5D /* Project.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = E41D3ED613B38FB500A75A5D /* Project.xcconfig */; };
 		E41D3EE613B3906D00A75A5D /* CoreOF.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = E41D3EE513B3906D00A75A5D /* CoreOF.xcconfig */; };
@@ -146,6 +147,9 @@
 		D51BE0B6188DF21B00359972 /* reticle_compass.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = reticle_compass.png; sourceTree = "<group>"; };
 		D5778379188F12B80038156E /* inside_circle.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = inside_circle.png; sourceTree = "<group>"; };
 		D577837B188F206F0038156E /* reticle_inside.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = reticle_inside.png; sourceTree = "<group>"; };
+		D5961C4118F882E300978303 /* AgentView.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = AgentView.mm; sourceTree = "<group>"; };
+		D5961C4218F882E300978303 /* AgentView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AgentView.h; sourceTree = "<group>"; };
+		D5961C4418F8861100978303 /* AgentCommon.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AgentCommon.h; sourceTree = "<group>"; };
 		D5D387C21891E3E200208CD3 /* inside_circle_w_fade.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = inside_circle_w_fade.png; sourceTree = "<group>"; };
 		D9BFFBBF4CC43DEE890B3C3E /* OscTypes.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 30; name = OscTypes.cpp; path = ../../../addons/ofxOsc/libs/oscpack/src/osc/OscTypes.cpp; sourceTree = SOURCE_ROOT; };
 		DF49D76C45D5DB505A234880 /* ofxOscMessage.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 30; name = ofxOscMessage.cpp; path = ../../../addons/ofxOsc/src/ofxOscMessage.cpp; sourceTree = SOURCE_ROOT; };
@@ -404,8 +408,11 @@
 				E4D8936B11527B74007E1F53 /* main.mm */,
 				E4D8936C11527B74007E1F53 /* testApp.h */,
 				E4D8936D11527B74007E1F53 /* testApp.mm */,
+				D5961C4418F8861100978303 /* AgentCommon.h */,
 				6190B19E1872392600EF6869 /* agentController.h */,
 				6190B19D1872392600EF6869 /* agentController.mm */,
+				D5961C4218F882E300978303 /* AgentView.h */,
+				D5961C4118F882E300978303 /* AgentView.mm */,
 				61E1E184187395D1006EF1AB /* ofxTimer.mm */,
 				61E1E185187395D1006EF1AB /* ofxTimer.h */,
 				D51BE0B5188DF21B00359972 /* reticle_outline.png */,
@@ -581,6 +588,7 @@
 				C4782ECC372420ACE0615B74 /* OscPrintReceivedElements.cpp in Sources */,
 				0546D1A38E13BD319CC9755B /* OscReceivedElements.cpp in Sources */,
 				879A251454401BC0B6E4F238 /* OscTypes.cpp in Sources */,
+				D5961C4318F882E300978303 /* AgentView.mm in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

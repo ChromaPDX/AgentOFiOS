@@ -13,56 +13,9 @@
 #include "ofxOsc.h"
 #include "ofxNetwork.h"
 
-#define NUM_MSG_STRINGS 20
-#define PORT 3456
-#define NUM_GESTURES 13
-#define NUM_PLACES 8
-#define NUM_TURNS 3  // per round
-#define ACTION_TIME 3000  // 3 seconds to execute action
-#define SENSOR_DATA_ARRAY_SIZE 128
+#include "AgentView.h"
 
-typedef enum
-{
-	GameStateLogin,
-    GameStateReadyRoom,
-	GameStatePlaying,
-    GameStateDeciding,
-	GameStateGameOver
-}
-GameState;
-
-typedef enum
-{
-    LoginStateChoose,
-    LoginStateClient,
-    LoginStateServer,
-    LoginStateConnecting,
-    LoginStateFailed,
-    LoginStateNoIP,
-    LoginStateServerQuit
-}
-LoginStateState;
-
-typedef enum
-{
-    TurnStateNotActive,
-    TurnStateReceivingScrambled,
-    TurnStateAction,
-    TurnStateActionSuccess,
-    TurnStateWaiting
-}
-TurnState;
-
-typedef enum
-{
-	RecordModeNothing,
-    RecordModeTouch,
-    RecordModeOrientation,
-    RecordModeAccel,
-    RecordModeGyro,
-    RecordModeSound
-}
-RecordMode;
+#include "AgentCommon.h"
 
 class agentController {
 	
@@ -89,6 +42,10 @@ public:
     
 private:
     
+    // these are duplicated from the View. presently required for touch. try to get these out of here
+    int width, height;
+    int centerX, centerY;  // screen Coords
+
     // NETWORKING
 	ofxTCPServer server;
 	ofxTCPClient client;
@@ -165,35 +122,16 @@ private:
     string getCodeFromInt(int num);
     
     void drawLoginScreen();
-    int loginState = 0;
+    LoginStateState loginState = LoginStateChoose;
     int loginCode = 0;
     int hostIp;
     float screenScale;
     
     // OF / UI / UX
-    ofColor primaries[7];   // 7 colors
-    int complementaries[21]; // indexes of primaries[] of complements to the primaries
-    int primaryColor;       // what is your color this round?
     int mouseX, mouseY;
-    int centerX, centerY;  // screen Coords
-    int width, height;
     char receivedText[128];
-    ofTrueTypeFont font;
-    ofTrueTypeFont fontSmall;
-    ofTrueTypeFont fontMedium;
-    ofSpherePrimitive sphere;
-    ofImage reticleCompass;
-    ofImage reticleOutline;
-    ofImage reticleInside;
-    ofImage fingerPrint;
-    ofImage insideCircle;
-    
-    ofImage increment;
-    ofImage decrement;
-    string lowerTextLine1, lowerTextLine2, lowerTextLine3;
-    
-    void drawAnimatedSphereBackground();
-    void drawInGameBackground();
+       
+    AgentView agentView;
 };
 
 #endif /* defined(__DoubleAgent__agentController__) */
