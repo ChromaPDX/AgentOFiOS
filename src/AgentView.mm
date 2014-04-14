@@ -37,6 +37,13 @@ void AgentView::setup(){
     increment.setAnchorPercent(.5, .5);
     decrement.loadImage("decrement.png");
     decrement.setAnchorPercent(.5, .5);
+    
+    spymess[0] = rand()%23+65;
+    spymess[1] = rand()%23+65;
+    spymess[2] = rand()%23+65;
+    spymess[3] = rand()%23+65;
+    spymess[4] = NULL;
+    
     primaries[0] = ofColor(255, 0, 210);    // pink  0
     primaries[1] = ofColor(17, 188, 61);    // green  1
     primaries[2] = ofColor(178, 44, 255);   // purple  2
@@ -77,7 +84,7 @@ void AgentView::setup(){
 //    draw hexagon
 //
 
-void AgentView::draw(GameState gameState, LoginStateState loginState, TurnState turnState, BOOL isServer, BOOL isSpy, int step, unsigned long stepInterval, unsigned long long stepTimer) {
+void AgentView::draw(GameState gameState, LoginStateState loginState, TurnState turnState, BOOL isSpy, int step, unsigned long stepInterval, unsigned long long stepTimer, BOOL isServer, BOOL isClient, int currentTurn) {
     
     ofClear(primaries[primaryColor]);
     
@@ -105,7 +112,7 @@ void AgentView::draw(GameState gameState, LoginStateState loginState, TurnState 
             ofSetColor(255);
             
             string hostString = "JOIN CODE";
-            string clientString = getCodeFromIp();
+            string clientString = controller->getCodeFromIp();
             fontMedium.drawString(hostString,width*.75 - fontMedium.stringWidth(hostString)/2.,ofGetHeight()*.1 - fontMedium.stringHeight(hostString)/2.);
             font.drawString(clientString,width*.5 - font.stringWidth(clientString)/2.,ofGetHeight()*.25 - font.stringHeight(clientString)/2.);
             
@@ -121,7 +128,7 @@ void AgentView::draw(GameState gameState, LoginStateState loginState, TurnState 
     
     if (gameState == GameStatePlaying || gameState == GameStateDeciding || gameState == GameStateGameOver) {
         
-        if(preGameCountdownSequence && step < 5){
+        if(controller->preGameCountdownSequence && step < 5){
             if(step >1){
                 if(isSpy)
                     font.drawString("shhh", centerX-font.stringWidth("shhh")/2., centerY);
@@ -166,8 +173,8 @@ void AgentView::draw(GameState gameState, LoginStateState loginState, TurnState 
                     float turnProgress = 1.0;
                     for(int i = 0; i < SENSOR_DATA_ARRAY_SIZE; i++){
                         if((float)i/SENSOR_DATA_ARRAY_SIZE < turnProgress){
-                            float x = centerX + outerRadius * sin(angle) * recordedSensorData[(i-1)*SENSOR_DATA_ARRAY_SIZE + i];
-                            float y = centerY + outerRadius * -cos(angle) * recordedSensorData[(i-1)*SENSOR_DATA_ARRAY_SIZE + i];
+                            float x = centerX + outerRadius * sin(angle) * controller->recordedSensorData[(i-1)*SENSOR_DATA_ARRAY_SIZE + i];
+                            float y = centerY + outerRadius * -cos(angle) * controller->recordedSensorData[(i-1)*SENSOR_DATA_ARRAY_SIZE + i];
                             ofVertex(x,y);
                             angle += deltaAngle;
                         }
@@ -186,11 +193,11 @@ void AgentView::draw(GameState gameState, LoginStateState loginState, TurnState 
                 outerRadius = centerX*.55;
                 deltaAngle = TWO_PI / (float)SENSOR_DATA_ARRAY_SIZE;
                 angle = 0;
-                float turnProgress = (float)(ofGetElapsedTimeMillis() - turnTime) / ACTION_TIME;   // from 0 to 1
+                float turnProgress = (float)(ofGetElapsedTimeMillis() - controller->turnTime) / ACTION_TIME;   // from 0 to 1
                 for(int i = 0; i < SENSOR_DATA_ARRAY_SIZE; i++){
                     if((float)i/SENSOR_DATA_ARRAY_SIZE < turnProgress){
-                        float x = centerX + outerRadius * sin(angle) * recordedSensorData[(currentTurn-1)*SENSOR_DATA_ARRAY_SIZE + i];
-                        float y = centerY + outerRadius * -cos(angle) * recordedSensorData[(currentTurn-1)*SENSOR_DATA_ARRAY_SIZE + i];
+                        float x = centerX + outerRadius * sin(angle) * controller->recordedSensorData[(currentTurn-1)*SENSOR_DATA_ARRAY_SIZE + i];
+                        float y = centerY + outerRadius * -cos(angle) * controller->recordedSensorData[(currentTurn-1)*SENSOR_DATA_ARRAY_SIZE + i];
                         ofVertex(x,y);
                         angle += deltaAngle;
                     }
@@ -206,7 +213,7 @@ void AgentView::draw(GameState gameState, LoginStateState loginState, TurnState 
                 fingerPrint.draw(centerX, centerY,insideCircle.width*.5, insideCircle.height*.5);
             }
             
-            if (( gameState == GameStatePlaying && !preGameCountdownSequence ) || gameState == GameStateDeciding || gameState == GameStateGameOver){
+            if (( gameState == GameStatePlaying && !controller->preGameCountdownSequence ) || gameState == GameStateDeciding || gameState == GameStateGameOver){
                 ofNoFill();
                 if(turnState == TurnStateReceivingScrambled || turnState == TurnStateAction || gameState == GameStateDeciding)
                     ofSetColor(primaries[complementaries[primaryColor*3+((currentTurn+1)%3)]]);  // modulus to vary color
@@ -233,27 +240,27 @@ void AgentView::draw(GameState gameState, LoginStateState loginState, TurnState 
             
             // BACK TO BUSINESS
             
-            if (mainMessage.length()){
+            if (controller->mainMessage.length()){
                 ofSetColor(255,255,255,255);
                 
-                if (animatedScrambleFont) {
+                if (controller->animatedScrambleFont) {
                     //if(rand()%2 == 0){
                     int index = rand()%4;
                     spymess[index] = rand()%23+65;
                     //}
                     font.drawString(ofToString(spymess),ofGetWidth()/2 - font.stringWidth(spymess)/2.,ofGetHeight()/2 + font.stringHeight(ofToString(spymess))/2.);
                 }
-                else if (useScrambledText){
+                else if (controller->useScrambledText){
                     font.drawString(ofToString(spymess),ofGetWidth()/2 - font.stringWidth(spymess)/2.,ofGetHeight()/2 + font.stringHeight(ofToString(spymess))/2.);
                 }
                 else
-                    font.drawString(mainMessage,ofGetWidth()/2 - font.stringWidth(mainMessage)/2.,ofGetHeight()/2 + font.stringHeight(mainMessage)/2.);
+                    font.drawString(controller->mainMessage,ofGetWidth()/2 - font.stringWidth(controller->mainMessage)/2.,ofGetHeight()/2 + font.stringHeight(controller->mainMessage)/2.);
             }
         }
     }
     
     if (!isServer && !isClient) {  // if not server or client
-        drawLoginScreen();
+        drawLoginScreen(loginState);
     }
     ofSetColor(255, 255);
     if(gameState == GameStateLogin){
@@ -268,18 +275,18 @@ void AgentView::draw(GameState gameState, LoginStateState loginState, TurnState 
     if(gameState == GameStateReadyRoom){
         if (isServer) {
             lowerTextLine1 = "YOU ARE THE HOST";
-            lowerTextLine2 = getCodeFromIp();
+            lowerTextLine2 = controller->getCodeFromIp();
             lowerTextLine3 = "Share this code for others to log in";
         }
         else {
             lowerTextLine1 = "YOU ARE CONNECTED";
-            lowerTextLine2 = "to host: " + getCodeFromInt(loginCode);
+            lowerTextLine2 = "to host: " + controller->getCodeFromInt(controller->loginCode);
             lowerTextLine3 = "Waiting for host to start the game";
         }
     }
     
     if(gameState == GameStatePlaying){
-        if(preGameCountdownSequence){
+        if(controller->preGameCountdownSequence){
             if(step > 6){
                 lowerTextLine1 = "AGENT ID";
                 lowerTextLine2 = "AGENT";
@@ -302,11 +309,11 @@ void AgentView::draw(GameState gameState, LoginStateState loginState, TurnState 
     }
     if(gameState == GameStateGameOver){
         lowerTextLine1 = "MISSION";
-        if(strcmp(mainMessage.c_str(), "SPY CAPTURED!") == 0){
+        if(strcmp(controller->mainMessage.c_str(), "SPY CAPTURED!") == 0){
             lowerTextLine2 = "SUCCESS";
             lowerTextLine3 = "You have sucessfully uncovered the double agent";
         }
-        else if(strcmp(mainMessage.c_str(), "NOPE!") == 0){
+        else if(strcmp(controller->mainMessage.c_str(), "NOPE!") == 0){
             lowerTextLine2 = "FAIL";
             lowerTextLine3 = "the double agent got away";
         }
@@ -318,14 +325,14 @@ void AgentView::draw(GameState gameState, LoginStateState loginState, TurnState 
     fontSmall.drawString(lowerTextLine2, 60, centerY+centerY*.66+40);
     fontSmall.drawString(lowerTextLine3, 60, centerY+centerY*.66+80);
     
-    if (connectedAgents > 1){   // CONNECTED AGENTS
-        string count = connectedAgentsStrings[connectedAgents];//ofToString(connectedAgents);
+    if (controller->connectedAgents > 1){   // CONNECTED AGENTS
+        string count = connectedAgentsStrings[controller->connectedAgents];//ofToString(connectedAgents);
         ofSetColor(0,0,0);
         font.drawString(count, centerX-font.stringWidth(count)/2.,ofGetHeight() - font.stringHeight(count));
     }
 }
 
-void AgentView::drawLoginScreen() {
+void AgentView::drawLoginScreen(LoginStateState loginState) {
     
     string hostString = "HOST";
     string clientString = "JOIN";
@@ -344,7 +351,7 @@ void AgentView::drawLoginScreen() {
             
         case LoginStateServer:
             hostString = "JOIN CODE";
-            clientString = getCodeFromIp();
+            clientString = controller->getCodeFromIp();
             fontMedium.drawString(backString,fontMedium.stringWidth(backString)*.35,ofGetHeight()*.1 - fontMedium.stringHeight(backString)/2.);
             font.drawString(hostString,ofGetWidth()/2 - font.stringWidth(hostString)/2.,ofGetHeight()*.4 - font.stringHeight(hostString)/2.);
             font.drawString(clientString,ofGetWidth()/2 - font.stringWidth(clientString)/2.,ofGetHeight()*.6 - font.stringHeight(clientString)/2.);
@@ -352,7 +359,7 @@ void AgentView::drawLoginScreen() {
             
         case LoginStateClient:
             hostString = "CODE";
-            clientString = getCodeFromInt(loginCode);
+            clientString = controller->getCodeFromInt(controller->loginCode);
             fontMedium.drawString(backString,fontMedium.stringWidth(backString)*.35,ofGetHeight()*.1 - fontMedium.stringHeight(backString)/2.);
             font.drawString(hostString,ofGetWidth()/2 - font.stringWidth(hostString)/2.,ofGetHeight()*.2 - font.stringHeight(hostString)/2.);
             font.drawString(clientString,ofGetWidth()/2 - font.stringWidth(clientString)/2.,ofGetHeight()*.475 - font.stringHeight(clientString)/2.);
@@ -368,7 +375,7 @@ void AgentView::drawLoginScreen() {
             
         case LoginStateConnecting:
             hostString = "CONNECTING TO";
-            clientString = getCodeFromInt(loginCode);
+            clientString = controller->getCodeFromInt(controller->loginCode);
             font.drawString(hostString,ofGetWidth()/2 - font.stringWidth(hostString)/2.,ofGetHeight()*.4 - font.stringHeight(hostString)/2.);
             font.drawString(clientString,ofGetWidth()/2 - font.stringWidth(clientString)/2.,ofGetHeight()*.6 - font.stringHeight(clientString)/2.);
             break;
@@ -410,13 +417,13 @@ void AgentView::drawInGameBackground(){
     ofSetColor(255, 255, 255, 75);
     reticleOutline.draw(centerX, centerY);
     ofPushMatrix();
-    float compassAngle = atan2f(orientation.d, orientation.e);
+    float compassAngle = atan2f(controller->orientation.d, controller->orientation.e);
     ofTranslate(centerX, centerY);
     ofRotate(compassAngle*180/PI);
     reticleCompass.draw(0,0);
     ofPopMatrix();
     ofPushMatrix();
-    float reticleInsideAngle = asinf(orientation.f);
+    float reticleInsideAngle = asinf(controller->orientation.f);
     ofTranslate(centerX, centerY);
     ofRotate(reticleInsideAngle*180/PI);
     reticleInside.draw(0, 0);

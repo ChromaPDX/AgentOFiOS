@@ -26,16 +26,13 @@ void agentController::setup() {
     currentTurn = 0;
 
     // GRAPHICS
-    spymess[0] = rand()%23+65;
-    spymess[1] = rand()%23+65;
-    spymess[2] = rand()%23+65;
-    spymess[3] = rand()%23+65;
-    spymess[4] = NULL;
-
     width = ofGetWidth();
     height = ofGetHeight();
     centerX = ofGetWidth()/2.;
     centerY = ofGetHeight()/2.;
+    
+    agentView.setup();
+    agentView.controller = this;
 }
 
 #pragma mark NETWORK
@@ -741,7 +738,7 @@ void agentController::updateOrientation(ofMatrix3x3 newOrientationMatrix, ofMatr
 #pragma mark - DRAW
 
 void agentController::draw() {
-    agentView.draw(gameState, loginState, turnState, isServer, isSpy, step, stepInterval, stepTimer);
+    agentView.draw(gameState, loginState, turnState, isSpy, step, stepInterval, stepTimer, isServer, isClient, currentTurn);
 }
 
 //bool agentController::processAcceleration() {

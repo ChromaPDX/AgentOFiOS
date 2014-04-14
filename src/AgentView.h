@@ -14,18 +14,20 @@
 
 #include "AgentCommon.h"
 
+class agentController;
 
 class AgentView{
     
 public:
     
     void setup(); // must be called
-    void draw(GameState gameState, LoginStateState loginState, TurnState turnState, BOOL isServer, BOOL isSpy, int step, unsigned long stepInterval, unsigned long long stepTimer);
-    
+    void draw(GameState gameState, LoginStateState loginState, TurnState turnState, BOOL isSpy, int step, unsigned long stepInterval, unsigned long long stepTimer, BOOL isServer, BOOL isClient, int currentTurn);
+
+    agentController *controller;
     
 private:
 
-    void drawLoginScreen();
+    void drawLoginScreen(LoginStateState loginState);
     void drawInGameBackground();
     void drawAnimatedSphereBackground();
 
@@ -35,6 +37,7 @@ private:
     int primaryColor;       // what is your color this round?
     ofColor primaries[7];   // 7 colors
     int complementaries[21]; // indexes of primaries[] of complements to the primaries
+    char spymess[5];  // scrambled text
     ofTrueTypeFont font;
     ofTrueTypeFont fontSmall;
     ofTrueTypeFont fontMedium;
@@ -49,6 +52,7 @@ private:
     ofImage increment;
     ofImage decrement;
     string lowerTextLine1, lowerTextLine2, lowerTextLine3;
+    string connectedAgentsStrings[NUM_PLACES+1] = {"", ".", ". .", ". . .", ". . . .", ". . . . .", ". . . . . .", ". . . . . . .", ". . . . . . . ."};
 };
 
 #endif /* defined(__DoubleAgent__AgentView__) */

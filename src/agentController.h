@@ -40,6 +40,26 @@ public:
     void touchMoved(int x, int y, int id);
     void touchEnded(int x, int y, int id);
     
+// all the things i needed to make public to break out the display function
+    string getCodeFromIp();
+    string getCodeFromInt(int num);
+    int loginCode = 0;
+
+    bool preGameCountdownSequence;
+
+    float recordedSensorData[SENSOR_DATA_ARRAY_SIZE * 3];
+
+    unsigned long long turnTime;  // beginning of each turn. for calculating reaction time
+
+    string mainMessage;   // the action command, used for display and orientation within the game loop
+
+    bool animatedScrambleFont;    // turns to false on everybody's phone the moment the execute function happens
+
+    int connectedAgents;  // client stores from server server.getNumClients()
+
+    ofMatrix3x3 orientation; // device orientation
+
+    bool useScrambledText;    // (true: display spyMess, false: mainMessage) dynamically switches on DAs phone, and everybody elses, remains true on DAs phone during execute function
 private:
     
     // these are duplicated from the View. presently required for touch. try to get these out of here
@@ -49,7 +69,6 @@ private:
     // NETWORKING
 	ofxTCPServer server;
 	ofxTCPClient client;
-    int connectedAgents;  // client stores from server server.getNumClients()
 	std::string localIP;
 	std::string serverIP;
     string Rx;
@@ -64,11 +83,9 @@ private:
 	ofVec3f accel, normAccel;
     ofVec3f filteredAccel;
     ofVec3f userAccelerationArray[SENSOR_DATA_ARRAY_SIZE];
-    float recordedSensorData[SENSOR_DATA_ARRAY_SIZE * 3];
     int accelIndex = 0;  // filter array index
     float getMaxSensorScale(); // grab max value from deltaOrientation;
     //updated sensor
-    ofMatrix3x3 orientation; // device orientation
     ofMatrix3x3 deltaOrientation;  // change in orientation. at rest, is the identity matrix
     
     void logMatrix3x3(ofMatrix3x3 matrix);
@@ -82,22 +99,15 @@ private:
     int currentTurn;   // resets to 0 each new round
     unsigned long stepInterval;  // period between a step
     unsigned long long stepTimer;  // timestamp beginning of a step to offset against
-    string mainMessage;   // the action command, used for display and orientation within the game loop
     string placeString[NUM_PLACES] = {"DATA SENT","DATA SENT","DATA SENT","DATA SENT","DATA SENT","DATA SENT","DATA SENT","DATA SENT"};//{"1st","2nd","3rd","4th","5th","6th","7th","8th"};
     string actionString[NUM_GESTURES] = {"NOTHING","JUMP","TOUCH SCREEN","SHAKE PHONE","SPIN","HIGH FIVE\nNEIGHBOR","POINT AT\nAN AGENT","FREEZE","CROUCH","STAND ON\nONE LEG","TOUCH PHONE\nWITH NOSE","RAISE\nA HAND","RUN IN PLACE"};
-    string connectedAgentsStrings[NUM_PLACES+1] = {"", ".", ". .", ". . .", ". . . .", ". . . . .", ". . . . . .", ". . . . . . .", ". . . . . . . ."};
-    char spymess[5];  // scrambled text
     bool actionHasOccurred(string message);     // prevent repeating actions per round
     string previousActions[NUM_TURNS];  // prevent repeating actions per round, history of moves. gets cleared every round start
     
-    unsigned long long turnTime;  // beginning of each turn. for calculating reaction time
     unsigned long long recordedTimes[16];  // index [0] is always for self. server utilizes all the rest of the indexes, correlates to clientID
     
     RecordMode recordMode;  // GameAction type   // is 0 being used properly?
     bool isSpy;    // set when client receives "spy" or "notspy"
-    bool useScrambledText;    // (true: display spyMess, false: mainMessage) dynamically switches on DAs phone, and everybody elses, remains true on DAs phone during execute function
-    bool animatedScrambleFont;    // turns to false on everybody's phone the moment the execute function happens
-    bool preGameCountdownSequence;
 //    int pickerAccordingToServer;  // not used anymore
     int spyAccordingToServer;
     
@@ -118,12 +128,8 @@ private:
     
     void stopServer();
     
-    string getCodeFromIp();
-    string getCodeFromInt(int num);
-    
     void drawLoginScreen();
     LoginStateState loginState = LoginStateChoose;
-    int loginCode = 0;
     int hostIp;
     float screenScale;
     
