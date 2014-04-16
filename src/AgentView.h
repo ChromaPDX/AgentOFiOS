@@ -21,13 +21,18 @@ class AgentView{
 public:
     
     void setup(); // must be called
-    void draw(GameState gameState, LoginStateState loginState, TurnState turnState, BOOL isSpy, int step, unsigned long stepInterval, unsigned long long stepTimer, BOOL isServer, BOOL isClient, int currentTurn);
+    void draw(ProgramState state, NetworkState networkState, long elapsedMillis, long stateBeginTime, BOOL isServer, BOOL isSpy);
+    
+//    void draw(GameState gameState, LoginStateState loginState, TurnState turnState, BOOL isSpy, int step, unsigned long stepInterval, unsigned long long stepTimer, BOOL isServer, BOOL isClient, int currentTurn);
 
     agentController *controller;
     
+    void setWIFIExist(bool w);
 private:
+    
+    bool WIFIExist;
 
-    void drawLoginScreen(LoginStateState loginState);
+//    void drawLoginScreen(LoginStateState loginState);
     void drawInGameBackground();
     void drawAnimatedSphereBackground();
 
@@ -48,6 +53,7 @@ private:
     ofImage reticleInside;
     ofImage fingerPrint;
     ofImage insideCircle;
+    string mainMessage;
     
     ofImage increment;
     ofImage decrement;

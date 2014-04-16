@@ -18,38 +18,33 @@
 #define ACTION_TIME 3000  // 3 seconds to execute action
 #define SENSOR_DATA_ARRAY_SIZE 128
 
+typedef enum
+{
+    StateWelcomeScreen,
+    StateConnectionScreen,
+    StateJoinScreen,
+    StateReadyRoom,         // BEGIN GAME LOOP
+    StateStartGame,         //
+    StateCountdown,         //
+    StateTurnScramble,      //  // BEGIN TURN LOOP
+    StateTurnGesture,       //  //
+    StateTurnComplete,      //  // END TURN LOOP
+    StateDecide,            //
+    StateGameOver           // END GAME LOOP
+}
+ProgramState;
 
 typedef enum
 {
-	GameStateLogin,
-    GameStateReadyRoom,
-	GameStatePlaying,
-    GameStateDeciding,
-	GameStateGameOver
+    NetworkNone,
+    NetworkHostAttempt,
+    NetworkHostSuccess,
+    NetworkJoinAttempt,
+    NetworkJoinSuccess,
+    NetworkLostConnection,      // try to make these 2 into 1
+    NetworkServerDisconnected   //
 }
-GameState;
-
-typedef enum
-{
-    LoginStateChoose,
-    LoginStateClient,
-    LoginStateServer,
-    LoginStateConnecting,
-    LoginStateFailed,
-    LoginStateNoIP,
-    LoginStateServerQuit
-}
-LoginStateState;
-
-typedef enum
-{
-    TurnStateNotActive,
-    TurnStateReceivingScrambled,
-    TurnStateAction,
-    TurnStateActionSuccess,
-    TurnStateWaiting
-}
-TurnState;
+NetworkState;
 
 typedef enum
 {
@@ -62,5 +57,37 @@ typedef enum
 }
 RecordMode;
 
+
+//typedef enum
+//{
+//	GameStateLogin,
+//    GameStateReadyRoom,
+//	GameStatePlaying,
+//    GameStateDeciding,
+//	GameStateGameOver
+//}
+//GameState;
+//
+//typedef enum
+//{
+//    LoginStateChoose,
+//    LoginStateClient,
+//    LoginStateServer,
+//    LoginStateConnecting,
+//    LoginStateFailed,
+//    LoginStateNoIP,
+//    LoginStateServerQuit
+//}
+//LoginStateState;
+//
+//typedef enum
+//{
+//    TurnStateNotActive,
+//    TurnStateReceivingScrambled,
+//    TurnStateAction,
+//    TurnStateActionSuccess,
+//    TurnStateWaiting
+//}
+//TurnState;
 
 #endif

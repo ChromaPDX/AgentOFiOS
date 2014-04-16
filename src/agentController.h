@@ -10,12 +10,11 @@
 #define __DoubleAgent__agentController__
 
 #include "ofMain.h"
-#include "ofxOsc.h"
+//#include "ofxOsc.h"
 #include "ofxNetwork.h"
 
-#include "AgentView.h"
-
 #include "AgentCommon.h"
+#include "AgentView.h"
 
 class agentController {
 	
@@ -60,6 +59,7 @@ public:
     ofMatrix3x3 orientation; // device orientation
 
     bool useScrambledText;    // (true: display spyMess, false: mainMessage) dynamically switches on DAs phone, and everybody elses, remains true on DAs phone during execute function
+
 private:
     
     // these are duplicated from the View. presently required for touch. try to get these out of here
@@ -76,9 +76,11 @@ private:
     bool isServer = false;
     void updateTCP();  // packet sniffer, server and client
     void updateSlowTCP();  // packet sniffer, server and client, only called once per second
+    void updateOnceASecond();
     void sendMessage(string message);   // if client, send to server.  if server, send to all clients
     int oneSecond;  // tracking time, preventing updateSlowTCP() redundant calls
     
+    bool doesWIFIExist();
     // SENSORS
 	ofVec3f accel, normAccel;
     ofVec3f filteredAccel;
@@ -91,9 +93,11 @@ private:
     void logMatrix3x3(ofMatrix3x3 matrix);
     void logMatrix4x4(ofMatrix4x4 matrix);
     
-    // STUFF RELATED TO SECRET AGENT
-    GameState gameState;
-    TurnState turnState;
+    // STUFF RELATED TO DOUBLE AGENT
+    ProgramState state = StateWelcomeScreen;
+    NetworkState networkState = NetworkNone;
+//    GameState gameState;
+//    TurnState turnState;
     int step;  // game loop interval. used for countdowns and rounds, increments to 3 for countdown, increments to TURNS*3 for rounds
     int numSteps;  // sets the ceiling of each countdown and round. 3 for countdowns, TURNS*3 for rounds
     int currentTurn;   // resets to 0 each new round
@@ -113,9 +117,13 @@ private:
     
     typedef void (*StepFunctionPtr)(int);
     void (agentController::*stepFunction)(int);
+    void (agentController::*updateFunction)() = NULL;
 
-    void startGame();        // initiated by server with "startGame", used by clients and servers
-    void countDown(int curstep);  // can be stepFunction
+//    void dramaticallyRevealYourRole();
+    void updateState(ProgramState newState);
+        long stateBeginTime;
+    void generateNewSpyRoles();   // initiated by server with "startGame"
+//    void countDown(int curstep);  // can be stepFunction
     void serveRound(int curstep); // can be stepFunction   (server only function)
     void execute(string gesture);   // the moment a turn begins, timers start
     void countScores();       // server only
@@ -129,7 +137,7 @@ private:
     void stopServer();
     
     void drawLoginScreen();
-    LoginStateState loginState = LoginStateChoose;
+//    LoginStateState loginState = LoginStateChoose;
     int hostIp;
     float screenScale;
     
@@ -138,6 +146,7 @@ private:
     char receivedText[128];
        
     AgentView agentView;
+    long elapsedMillis;
 };
 
 #endif /* defined(__DoubleAgent__agentController__) */

@@ -9,7 +9,7 @@
 #include "agentController.h"
 
 #import "testApp.h"
-#import "ofxTimer.h"
+//#import "ofxTimer.h"
 
 string paddedString(int num){
     if (num >= 100)     return ofToString(num);
@@ -20,9 +20,8 @@ string paddedString(int num){
 void agentController::setup() {
     
     // GAME / PROGRAM
-    gameState = GameStateLogin;
-    loginState = LoginStateChoose;
-    turnState = TurnStateNotActive;                                                                                         // turnState  :  not active
+    updateState(StateWelcomeScreen);
+    networkState = NetworkNone;
     currentTurn = 0;
 
     // GRAPHICS
@@ -37,29 +36,36 @@ void agentController::setup() {
 
 #pragma mark NETWORK
 
+// only called once / second
+void agentController::updateSlowTCP(){
+    if(isServer){  //  send number of clients
+        sendMessage(ofToString(connectedAgents));
+    }
+    else if (isClient) { }
+}
+
 // SERVER:
 // CLIENT: turn control (start turn, scramble, execute, pick, captured/not captured), receive isSpy
 void agentController::updateTCP() {
     
 	if (isServer){
+        // simultaneously count connectedAgents
+        // and check if anyone is sending a message
         connectedAgents = 1;
 	    for(int i = 0; i < server.getLastID(); i++) { // getLastID is UID of all clients
             if( server.isClientConnected(i) ) { // check and see if it's still around
                 connectedAgents++;
                 // maybe the client is sending something
                 Rx = server.receive(i);
-                //server.send(i, "You sent: "+str);
                 if (Rx.length()){
                 	strcpy( receivedText, Rx.c_str() );
                     ofLogNotice("TCP") << "Agent:" + ofToString(i) + " : " + Rx;
-                    
                     if (strcmp(receivedText, "pickedAgent") == 0) {
+                        // client's screen got touched during the end of game decision time
                         pickedAgent(i+1);
                     }
-//                    else  if (strcmp(receivedText, "login") == 0) {
-//                        activeAgents++;  // TODO needs a point where activeAgents--
-//                    }
-                    else {// must be a number
+                    else {
+                        // must be the client sending back performance data for turn gesture
                         recordedTimes[i+1] = ofToInt(Rx);
                     }
                 }
@@ -69,11 +75,12 @@ void agentController::updateTCP() {
     else if (isClient){
         
     	if (!client.isConnected()){
+            // client was once connected, but no longer. feel free to blame the server. this is a terrible restaurant.
     		client.close();
     		isClient = false;
     		connectedAgents = 0;
-    		gameState = GameStateLogin;
-    		loginState = LoginStateServerQuit;
+            networkState = NetworkLostConnection;
+            updateState(StateWelcomeScreen);
     		return;
     	}
         
@@ -81,19 +88,11 @@ void agentController::updateTCP() {
         if (Rx.length()){
 	    	ofLogNotice("TCP") << "Received From Server: " + Rx;
             strcpy( receivedText, Rx.c_str() );
-            if (strcmp(receivedText, "startGame") == 0) {
-                startGame();
-//                sendMessage("login");
+            if (strcmp(receivedText, "stateStartGame") == 0) {
+                updateState(StateStartGame);
             }
             else if (strcmp(receivedText, "execute") == 0) {
                 execute(mainMessage);
-            }
-            else if (strcmp(receivedText, "PICK") == 0) {
-                ((testApp*) ofGetAppPtr())->vibrate(true);
-                //execute(mainMessage);
-                mainMessage = "OPERATIVE I.D.";  // "PICK"
-                gameState = GameStateDeciding;                                                                                  // gameState  :  deciding
-                turnState = TurnStateNotActive;                                                                                  // turnState  :  not active
             }
             else if (strcmp(receivedText, "spy") == 0) {
                 isSpy = true;
@@ -101,19 +100,31 @@ void agentController::updateTCP() {
             else if (strcmp(receivedText, "notspy") == 0) {
                 isSpy = false;
             }
-            else if (strcmp(receivedText, "SPY CAPTURED!") == 0) {
+            else if (strcmp(receivedText, "stateTurnComplete") == 0){
+                useScrambledText = false;
+                mainMessage = "TurnOVER BLA BLA not being displayed anyway";
+                updateState(StateTurnComplete);
+            }
+            else if (strcmp(receivedText, "stateDecide") == 0) {
+                ((testApp*) ofGetAppPtr())->vibrate(true);
+                mainMessage = "OPERATIVE I.D.";  // "PICK"
+                updateState(StateDecide);
+            }
+            else if (strcmp(receivedText, "WIN") == 0) {
                 mainMessage = "SPY CAPTURED!";
-                gameState = GameStateGameOver;
+                updateState(StateGameOver);
                 stepTimer = ofGetElapsedTimeMillis();
                 stepInterval = 5000;
             }
-            else if (strcmp(receivedText, "NOPE!") == 0) {
+            else if (strcmp(receivedText, "LOSE") == 0) {
                 mainMessage = "NOPE!";
-                gameState = GameStateGameOver;
+                updateState(StateGameOver);
                 stepTimer = ofGetElapsedTimeMillis();
                 stepInterval = 5000;
             }
             else {
+                // improve this.
+                // check receivedText against all the gesture commands
                 bool wasTurnRelated = false;
                 for (int g = 0; g < NUM_GESTURES; g++) {
                     if (strcmp(receivedText, actionString[g].c_str()) == 0) {
@@ -122,18 +133,19 @@ void agentController::updateTCP() {
                         animatedScrambleFont = true;
                         mainMessage = Rx;
                         wasTurnRelated = true;
-                        turnState = TurnStateReceivingScrambled;                                                                // turnState  :  scrambled    (client)
+                        updateState(StateTurnScramble);
                         currentTurn++;
                     }
                 }
-                for (int g = 0; g < NUM_PLACES; g++) {
-                    if (strcmp(receivedText, placeString[g].c_str()) == 0) {
-                        useScrambledText = false;
-                        mainMessage = Rx;
-                        wasTurnRelated = true;
-                        turnState = TurnStateWaiting;                                                                           // turnState  :  waiting      (client)
-                    }
-                }
+//                for (int g = 0; g < NUM_PLACES; g++) {
+//                    if (strcmp(receivedText, placeString[g].c_str()) == 0) {
+//                        useScrambledText = false;
+//                        mainMessage = Rx;
+//                        wasTurnRelated = true;
+//                        state = StateTurnComplete;
+//                        //turnState = TurnStateWaiting;                                                                           // turnState  :  waiting      (client)
+//                    }
+//                }
                 if(!wasTurnRelated){  // nothing. can we count on this being a number? maybe.
                     connectedAgents = ofToInt(Rx);
                 }
@@ -154,16 +166,6 @@ void agentController::stopServer(){
 	}
 }
 
-void agentController::updateSlowTCP(){
-    if(oneSecond != ofGetSeconds()){   // only runs once/second
-        oneSecond = ofGetSeconds();
-        if(isServer){  //  send number of clients
-            sendMessage(ofToString(connectedAgents));
-        }
-        else if (isClient) { }
-    }
-}
-
 void agentController::sendMessage(string message){
     
 	if (isServer){
@@ -178,86 +180,47 @@ void agentController::sendMessage(string message){
 	}
 }
 
-#pragma mark - GAME LOGIC
+#pragma mark - GAME SCRIPTING
 
-
-void agentController::startGame(){
+void agentController::updateState(ProgramState newState){
+    state = newState;
+    stateBeginTime = ofGetElapsedTimeMillis();
     
-    if (isServer){
-        
-        gameState = GameStatePlaying;                                                                                       // gameState
-        spyAccordingToServer = rand() % (server.getLastID() + 1);
-        
-        if (spyAccordingToServer != 0){
-            while (!server.isClientConnected(spyAccordingToServer-1)){
-                spyAccordingToServer = rand() % (server.getLastID() + 1);
-            }
-        }
-       
-        for(int i = 0; i < server.getLastID() + 1; i++) { // getLastID is UID of all clients
-            
-            if (i == spyAccordingToServer) {
-                if (i == 0) {
-                    isSpy = true;
-                }
-                else {
-                    server.send(i-1, "spy");
-                }
-            }
-            else {
-                if (i == 0) {
-                    isSpy = false;
-                }
-                else {
-                    server.send(i-1, "notspy");
-                }
-            }
-        }
+    if(state == StateWelcomeScreen);
+    else if(state == StateConnectionScreen);
+    else if(state == StateJoinScreen);
+    else if(state == StateReadyRoom);
+    else if(state == StateStartGame){       // initiated by server sendMessage("stateStartGame")
+        if(isServer)
+            generateNewSpyRoles();
     }
-    countDown(0);
+    else if(state == StateCountdown){
+        currentTurn = 0;
+    }
+    else if(state == StateTurnScramble);
+    else if(state == StateTurnGesture);
+    else if(state == StateTurnComplete);    // initiated by server sendMessage("stateTurnComplete")
+    else if(state == StateDecide);          // initiated by server sendMessage("stateDecide")
+    else if(state == StateGameOver);        // initiated by server sendMessage "WIN" / "LOSE"
+
 }
 
-void agentController::countDown(int curstep) {
-    
-    gameState = GameStatePlaying;                                                                                                // gameState  :  playing
-    
-    if (!curstep) {  // possible for server and clients
-        step = 0;
-        stepInterval = 1000;
-        numSteps = 10;
-        stepTimer = ofGetElapsedTimeMillis();
-        preGameCountdownSequence = true;
-        stepFunction = &agentController::countDown;
-        currentTurn = 0;
-        return;
-    }
-    
-    switch (curstep) {
-        case 6:
-            mainMessage = "5";
-            break;
-        case 7:
-            mainMessage = "4";
-            break;
-        case 8:
-            mainMessage = "3";
-            break;
-        case 9:
-            mainMessage = "2";
-            break;
-        case 10:
-            mainMessage = "1";
-            break;
-        case 11:
-            //mainMessage = "";
-            stepInterval = 0;
-            preGameCountdownSequence = false;
-            if (isServer) {
-                serveRound(0);
+void agentController::generateNewSpyRoles(){
+    if (isServer){
+        // random spy role from list of IDs, which includes disconnected clients, repeat, until selected a connected client
+        do {
+            spyAccordingToServer = rand() % (server.getLastID() + 1);
+        } while (!server.isClientConnected(spyAccordingToServer - 1) && spyAccordingToServer != 0);
+        
+        // tell everyone that they are the spy or not the spy
+        if(spyAccordingToServer == 0) isSpy = true;
+        else isSpy = false;
+        for(int i = 1; i < server.getLastID() + 1; i++){
+            if(server.isClientConnected(i-1)){
+                if( spyAccordingToServer == i) server.send(i-1, "spy");
+                else server.send(i-1, "notspy");
             }
-            break;
-        default:
-            break;
+        }
     }
 }
 
@@ -280,12 +243,12 @@ void agentController::serveRound(int curstep){
         
         for(int i = 0; i < server.getLastID(); i++) {  // getLastID is UID of all clients
             if( server.isClientConnected(i) ) { // check and see if it's still around
-                server.send(i,"PICK");
+                server.send(i,"stateDecide");
             }
 	    }
         stepInterval = 0;
-        gameState = GameStateDeciding;                                                                                      // gameState  :  deciding
-        turnState = TurnStateNotActive;
+//        gameState = GameStateDeciding;                                                                                      // gameState  :  deciding
+//        turnState = TurnStateNotActive;
     }
     
     else if (curstep %3 == 0) { // MESSAGE
@@ -310,7 +273,7 @@ void agentController::serveRound(int curstep){
         animatedScrambleFont = true;
         sendMessage(mainMessage);
         ((testApp*) ofGetAppPtr())->vibrate(true);
-        turnState = TurnStateReceivingScrambled;                                                                            // turnState  :  scrambled       (server)
+//        turnState = TurnStateReceivingScrambled;                                                                            // turnState  :  scrambled       (server)
         stepInterval = 1000 + rand() % 3000;
         currentTurn++;
     }
@@ -322,7 +285,7 @@ void agentController::serveRound(int curstep){
     else if (curstep%3 == 2) { // RESULTS
 //        countScores();
         useScrambledText = false;
-        turnState = TurnStateWaiting;                                                                                       // turnState  :  waiting        (server)
+//        turnState = TurnStateWaiting;                                                                                       // turnState  :  waiting        (server)
         stepInterval = 6000;
     }
 }
@@ -337,7 +300,7 @@ bool agentController::actionHasOccurred(string message){
 
 void agentController::execute(string gesture){
     
-    turnState = TurnStateAction;                                                                                            // turnState  :  action
+//    turnState = TurnStateAction;                                                                                            // turnState  :  action
     animatedScrambleFont = false;
     if(!isSpy){
         useScrambledText = false;
@@ -378,58 +341,99 @@ void agentController::execute(string gesture){
     turnTime = ofGetElapsedTimeMillis();
 }
 
+void agentController::updateOnceASecond(){
+    if(oneSecond != ofGetSeconds()){   // only runs once/second
+        oneSecond = ofGetSeconds();
+    
+        if(isClient || isServer){
+            updateSlowTCP();
+        }
+        if(state == StateWelcomeScreen)
+            agentView.setWIFIExist(doesWIFIExist());
+    }
+}
+
 void agentController::update() {
+    elapsedMillis = ofGetElapsedTimeMillis();  // reduce calls to ofGetElapsedTimeMillis();
+    
+    updateOnceASecond();
     
     if (isClient || isServer) {
         
       	updateTCP();
-        updateSlowTCP();
         
-        if(turnState == TurnStateAction){
-            float turnProgress = (float)(ofGetElapsedTimeMillis() - turnTime) / ACTION_TIME;   // from 0 to 1
-            int index = SENSOR_DATA_ARRAY_SIZE*turnProgress;
-            if(index < 0) index = 0;
-            if(index >= SENSOR_DATA_ARRAY_SIZE) index = SENSOR_DATA_ARRAY_SIZE-1;
-            float maxScale = 4*getMaxSensorScale() + 1.;
-            recordedSensorData[(currentTurn-1)*SENSOR_DATA_ARRAY_SIZE + index] = maxScale;
+        // script advancement
+        
+        if(state == StateWelcomeScreen);
+        else if(state == StateConnectionScreen);
+        else if(state == StateJoinScreen);
+        else if(state == StateReadyRoom);
+        else if(state == StateStartGame){       // initiated by server sendMessage("stateStartGame")
+            if(elapsedMillis > stateBeginTime + 5000)
+                updateState(StateCountdown);
+        }
+        else if(state == StateCountdown){
+            if(elapsedMillis > stateBeginTime + 5000){
+                updateState(StateTurnScramble);
+                if (isServer)
+                    serveRound(0);
+            }
+        }
+        else if(state == StateTurnScramble);
+        else if(state == StateTurnGesture);
+        else if(state == StateTurnComplete);    // initiated by server sendMessage("stateTurnComplete")
+        else if(state == StateDecide);          // initiated by server sendMessage("stateDecide")
+        else if(state == StateGameOver);        // initiated by server sendMessage "WIN" / "LOSE"
+
+        if (updateFunction != NULL) {
+            (this->*updateFunction)();
         }
         
-        if(gameState == GameStateGameOver){
-            if (ofGetElapsedTimeMillis() - stepTimer > stepInterval ){
-                gameState = GameStateReadyRoom;
-                mainMessage = "";
-                stepInterval = 1000;
-                step = 0;
-                stepTimer = ofGetElapsedTimeMillis();
-            }
-        }
-        else if (gameState == GameStateReadyRoom){
-            if (ofGetElapsedTimeMillis() - stepTimer > stepInterval ){
-                step++;
-                
-                if (step > 16){//numSteps){
-                    //stepInterval = 0;
-                    step = 0;
-                }
-                stepTimer = ofGetElapsedTimeMillis();
-            }
-        }
-        else{
-            if (stepInterval){
-                if (ofGetElapsedTimeMillis() - stepTimer > stepInterval ){
-                    step++;
-                    if (step > 0){
-                        if (stepFunction != NULL) {
-                            (this->*stepFunction)(step);
-                        }
-                    }
-                    if (step > numSteps){
-                        stepInterval = 0;
-                    }
-                    stepTimer = ofGetElapsedTimeMillis();
-                }
-            }
-        }
+//        if(turnState == TurnStateAction){
+//            float turnProgress = (float)(ofGetElapsedTimeMillis() - turnTime) / ACTION_TIME;   // from 0 to 1
+//            int index = SENSOR_DATA_ARRAY_SIZE*turnProgress;
+//            if(index < 0) index = 0;
+//            if(index >= SENSOR_DATA_ARRAY_SIZE) index = SENSOR_DATA_ARRAY_SIZE-1;
+//            float maxScale = 4*getMaxSensorScale() + 1.;
+//            recordedSensorData[(currentTurn-1)*SENSOR_DATA_ARRAY_SIZE + index] = maxScale;
+//        }
+//        
+//        if(gameState == GameStateGameOver){
+//            if (ofGetElapsedTimeMillis() - stepTimer > stepInterval ){
+//                gameState = GameStateReadyRoom;
+//                mainMessage = "";
+//                stepInterval = 1000;
+//                step = 0;
+//                stepTimer = ofGetElapsedTimeMillis();
+//            }
+//        }
+//        else if (gameState == GameStateReadyRoom){
+//            if (ofGetElapsedTimeMillis() - stepTimer > stepInterval ){
+//                step++;
+//                
+//                if (step > 16){//numSteps){
+//                    //stepInterval = 0;
+//                    step = 0;
+//                }
+//                stepTimer = ofGetElapsedTimeMillis();
+//            }
+//        }
+//        else{
+//            if (stepInterval){
+//                if (ofGetElapsedTimeMillis() - stepTimer > stepInterval ){
+//                    step++;
+//                    if (step > 0){
+//                        if (stepFunction != NULL) {
+//                            (this->*stepFunction)(step);
+//                        }
+//                    }
+//                    if (step > numSteps){
+//                        stepInterval = 0;
+//                    }
+//                    stepTimer = ofGetElapsedTimeMillis();
+//                }
+//            }
+//        }
     }
 }
 
@@ -438,15 +442,15 @@ void agentController::pickedAgent(int agent) {
     
     if(agent == spyAccordingToServer){
         //sendMessage("agentDiscovered");
-        mainMessage = "SPY CAPTURED!";
+        mainMessage = "WIN";
         sendMessage(mainMessage);
     }
     else {
         //sendMessage("agentNotDiscovered");
-        mainMessage = "NOPE!";
+        mainMessage = "LOSE";
         sendMessage(mainMessage);
     }
-    gameState = GameStateGameOver;                                                                                          // gameState
+//    gameState = GameStateGameOver;                                                                                          // gameState
     stepTimer = ofGetElapsedTimeMillis();
     stepInterval = 5000;
 }
@@ -455,38 +459,40 @@ void agentController::pickedAgent(int agent) {
 // server only function
 void agentController::countScores(){
     
-    int places[16];
-    for (int p = 0; p < 16; p++) {
-        places[p] = -1;
-    }
-    for(int i = 0; i < server.getLastID() + 1; i++) {   // getLastID is UID of all clients
-        int lowestTime = 100000;
-        for(int j = 0; j < server.getLastID() + 1; j++){ // getLastID is UID of all clients
-            if (recordedTimes[j] <= lowestTime) {
-                bool shouldRecord = true;
-                for (int p = 0; p < 16; p++) {
-                    if (places[p] == j) {
-                        shouldRecord = false;
-                    }
-                }
-                if (shouldRecord) {
-                    lowestTime = recordedTimes[j];
-                    places[i] = j;
-                }
-            }
-        }
-        ofLogNotice("PLACES") << ofToString(places[i]) + " is in " + ofToString(i) + " place with " + ofToString(recordedTimes[places[i]]) + "time";
-    }
-    for(int i = 0; i < server.getLastID() + 1; i++) { // getLastID is UID of all clients
-        if (places[i] != 0) {
-            if( server.isClientConnected(places[i] - 1) ) { // check and see if it's still around
-                server.send(places[i]-1, placeString[i]);
-            }
-        }
-        else {
-            mainMessage = placeString[i];
-        }
-    }
+    server.sendToAll("stateTurnComplete");
+
+//    int places[16];
+//    for (int p = 0; p < 16; p++) {
+//        places[p] = -1;
+//    }
+//    for(int i = 0; i < server.getLastID() + 1; i++) {   // getLastID is UID of all clients
+//        int lowestTime = 100000;
+//        for(int j = 0; j < server.getLastID() + 1; j++){ // getLastID is UID of all clients
+//            if (recordedTimes[j] <= lowestTime) {
+//                bool shouldRecord = true;
+//                for (int p = 0; p < 16; p++) {
+//                    if (places[p] == j) {
+//                        shouldRecord = false;
+//                    }
+//                }
+//                if (shouldRecord) {
+//                    lowestTime = recordedTimes[j];
+//                    places[i] = j;
+//                }
+//            }
+//        }
+//        ofLogNotice("PLACES") << ofToString(places[i]) + " is in " + ofToString(i) + " place with " + ofToString(recordedTimes[places[i]]) + "time";
+//    }
+//    for(int i = 0; i < server.getLastID() + 1; i++) { // getLastID is UID of all clients
+//        if (places[i] != 0) {
+//            if( server.isClientConnected(places[i] - 1) ) { // check and see if it's still around
+//                server.send(places[i]-1, placeString[i]);
+//            }
+//        }
+//        else {
+//            mainMessage = placeString[i];
+//        }
+//    }
 }
 
 
@@ -496,142 +502,141 @@ void agentController::countScores(){
 //--------------------------------------------------------------
 void agentController::touchBegan(int x, int y, int id){
     
-    switch (gameState) {
-            
-        case GameStateLogin:
-            
-            switch (loginState) {
-                case LoginStateChoose:
-                    if (y < centerY) {
-                        int con = serverConnect();
-                        if (con == -1){
-                            loginState = LoginStateNoIP;
-                            ofLogNotice("choose screen") << "no ip";
-                        }
-                        else if (con == 0) {
-                            loginState = LoginStateFailed;
-                        }
-                        else {
-                            ofLogNotice("choose server") << "yes!";
-                            loginState = LoginStateServer;
-                            
-                            isServer = true;
-                            gameState = GameStateReadyRoom;
-                            stepInterval = 1000;
-                            step = 0;
-                            stepTimer = ofGetElapsedTimeMillis();
-                        }
-                    }
-                    else {
-                        loginState = LoginStateClient;
-                    }
-                    break;
-                case LoginStateServer:
-                    break;
-                    
-                case LoginStateClient:
-                    if (y < height * .2) {
-                        loginState = LoginStateChoose;
-                    }
-                    else if (y < height * .65){
-                        if (x < width * .4) {
-                            if (y < height * .5) { // inc 100's
-                                loginCode >= 200 ? loginCode -= 200 : loginCode += 100;
-                            }
-                            else {
-                                loginCode < 100 ? loginCode += 200 : loginCode -= 100;
-                            }
-                        }
-                        else if (x > width *.4 && x < width * .6){
-                            int tens = loginCode - ((loginCode / 100) * 100);
-                            if (y < height * .5) { // inc 100's
-                                tens >= 90 ? loginCode -= 90 : loginCode += 10;
-                            }
-                            else {
-                                tens < 10 ? loginCode += 90 : loginCode -= 10;
-                            }
-                        }
-                        else if (x > width * .6){
-                            int tens = loginCode - ((loginCode / 100) * 100);
-                            int ones = tens - ((tens / 10) * 10);
-                            if (y < height * .5) { // inc 100's
-                                ones >= 9 ? loginCode -= 9 : loginCode += 1;
-                            }
-                            else {
-                                ones < 1 ? loginCode += 9 : loginCode -= 1;
-                            }
-                        }
-                    }
-                    else {
-                        int con = clientConnect();
-                        if (con == 0) {
-                            loginState = LoginStateFailed;
-                        }
-                        else if (con == -1){
-                            loginState = LoginStateNoIP;
-                        }
-                        else {
-                            isClient = true;
-                            gameState = GameStateReadyRoom;                                                                            // gameState  :  connected
-                            ofLogNotice("+++ GameState updated:") << "Ready Room, setIPAddress()";
-                            stepInterval = 1000;
-                            step = 0;
-                            stepTimer = ofGetElapsedTimeMillis();
-                        }
-                    }
-                    break;
-                    
-                case LoginStateConnecting:
-                    break;
-                    
-                case LoginStateFailed: case LoginStateNoIP: case LoginStateServerQuit:
-                    loginState = LoginStateChoose;
-                    break;
-                    
-                default:
-                    break;
-            }
-            break;
-            
-        case GameStateReadyRoom:
-            
-            if (y < height * .2) {
-                gameState = GameStateLogin;
-                loginState = LoginStateChoose;
-                if (isServer){stopServer(); isServer = 0;}
-                if (isClient){client.close(); isClient = 0;}
-            }
-            else if (isServer && connectedAgents > 1){
-                sendMessage("startGame");
-                //sleep(250);
-                startGame();
-            }
-            break;
-            
-        case GameStatePlaying:
-            if (recordMode == RecordModeTouch) {
-                turnState = TurnStateActionSuccess;                                                                         // turnState  :  action success
-                recordMode = RecordModeNothing;        // turn off recording
-                recordedTimes[0] = ofGetElapsedTimeMillis() - turnTime;
-                ((testApp*) ofGetAppPtr())->vibrate(true);
-                if (isClient) {
-                    sendMessage(ofToString(recordedTimes[0]));
-                }
-            }
-            break;
-            
-        case GameStateDeciding:
-            if (isServer) {
-                pickedAgent(0);
-            }
-            else if (isClient){
-                sendMessage("pickedAgent");
-            }
-            break;
-            
-        default:
-            break;
-    }
+//    switch (gameState) {
+//            
+//        case GameStateLogin:
+//            
+//            switch (loginState) {
+//                case LoginStateChoose:
+//                    if (y < centerY) {
+//                        int con = serverConnect();
+//                        if (con == -1){
+//                            loginState = LoginStateNoIP;
+//                            ofLogNotice("choose screen") << "no ip";
+//                        }
+//                        else if (con == 0) {
+//                            loginState = LoginStateFailed;
+//                        }
+//                        else {
+//                            ofLogNotice("choose server") << "yes!";
+//                            loginState = LoginStateServer;
+//                            
+//                            isServer = true;
+//                            gameState = GameStateReadyRoom;
+//                            stepInterval = 1000;
+//                            step = 0;
+//                            stepTimer = ofGetElapsedTimeMillis();
+//                        }
+//                    }
+//                    else {
+//                        loginState = LoginStateClient;
+//                    }
+//                    break;
+//                case LoginStateServer:
+//                    break;
+//                    
+//                case LoginStateClient:
+//                    if (y < height * .2) {
+//                        loginState = LoginStateChoose;
+//                    }
+//                    else if (y < height * .65){
+//                        if (x < width * .4) {
+//                            if (y < height * .5) { // inc 100's
+//                                loginCode >= 200 ? loginCode -= 200 : loginCode += 100;
+//                            }
+//                            else {
+//                                loginCode < 100 ? loginCode += 200 : loginCode -= 100;
+//                            }
+//                        }
+//                        else if (x > width *.4 && x < width * .6){
+//                            int tens = loginCode - ((loginCode / 100) * 100);
+//                            if (y < height * .5) { // inc 100's
+//                                tens >= 90 ? loginCode -= 90 : loginCode += 10;
+//                            }
+//                            else {
+//                                tens < 10 ? loginCode += 90 : loginCode -= 10;
+//                            }
+//                        }
+//                        else if (x > width * .6){
+//                            int tens = loginCode - ((loginCode / 100) * 100);
+//                            int ones = tens - ((tens / 10) * 10);
+//                            if (y < height * .5) { // inc 100's
+//                                ones >= 9 ? loginCode -= 9 : loginCode += 1;
+//                            }
+//                            else {
+//                                ones < 1 ? loginCode += 9 : loginCode -= 1;
+//                            }
+//                        }
+//                    }
+//                    else {
+//                        int con = clientConnect();
+//                        if (con == 0) {
+//                            loginState = LoginStateFailed;
+//                        }
+//                        else if (con == -1){
+//                            loginState = LoginStateNoIP;
+//                        }
+//                        else {
+//                            isClient = true;
+//                            gameState = GameStateReadyRoom;                                                                            // gameState  :  connected
+//                            ofLogNotice("+++ GameState updated:") << "Ready Room, setIPAddress()";
+//                            stepInterval = 1000;
+//                            step = 0;
+//                            stepTimer = ofGetElapsedTimeMillis();
+//                        }
+//                    }
+//                    break;
+//                    
+//                case LoginStateConnecting:
+//                    break;
+//                    
+//                case LoginStateFailed: case LoginStateNoIP: case LoginStateServerQuit:
+//                    loginState = LoginStateChoose;
+//                    break;
+//                    
+//                default:
+//                    break;
+//            }
+//            break;
+//            
+//        case GameStateReadyRoom:
+//            
+//            if (y < height * .2) {
+//                gameState = GameStateLogin;
+//                loginState = LoginStateChoose;
+//                if (isServer){stopServer(); isServer = 0;}
+//                if (isClient){client.close(); isClient = 0;}
+//            }
+//            else if (isServer && connectedAgents > 1){
+//                sendMessage("stateStartGame");
+//                updateState(StateStartGame);
+//            }
+//            break;
+//            
+//        case GameStatePlaying:
+//            if (recordMode == RecordModeTouch) {
+//                turnState = TurnStateActionSuccess;                                                                         // turnState  :  action success
+//                recordMode = RecordModeNothing;        // turn off recording
+//                recordedTimes[0] = ofGetElapsedTimeMillis() - turnTime;
+//                ((testApp*) ofGetAppPtr())->vibrate(true);
+//                if (isClient) {
+//                    sendMessage(ofToString(recordedTimes[0]));
+//                }
+//            }
+//            break;
+//            
+//        case GameStateDeciding:
+//            if (isServer) {
+//                pickedAgent(0);
+//            }
+//            else if (isClient){
+//                sendMessage("pickedAgent");
+//            }
+//            break;
+//            
+//        default:
+//            break;
+//    }
     
 	//sendMessage("touch down");
 }
@@ -686,7 +691,7 @@ void agentController::updateAccel(ofVec3f newAccel){
 //        }
         
         if (didIt) {
-            turnState = TurnStateActionSuccess;                                                                        // turnState  :  action Success
+//            turnState = TurnStateActionSuccess;                                                                        // turnState  :  action Success
             recordedTimes[0] = ofGetElapsedTimeMillis() - turnTime;
             ((testApp*) ofGetAppPtr())->vibrate(true);
             
@@ -738,7 +743,7 @@ void agentController::updateOrientation(ofMatrix3x3 newOrientationMatrix, ofMatr
 #pragma mark - DRAW
 
 void agentController::draw() {
-    agentView.draw(gameState, loginState, turnState, isSpy, step, stepInterval, stepTimer, isServer, isClient, currentTurn);
+    agentView.draw(state, networkState, elapsedMillis, stateBeginTime, isServer, isSpy);
 }
 
 //bool agentController::processAcceleration() {
@@ -846,9 +851,14 @@ string agentController::getCodeFromIp(){
         
         return string(code);
     }
-    
-    
-    
+}
+
+bool agentController::doesWIFIExist(){
+    if (localIP.compare("error") == 0 || !localIP.length()) {
+        ofLogNotice("TCP") << "SERVER FAILED ! NO IP";
+        return 0;
+    }
+    return 1;
 }
 
 int agentController::serverConnect(){
@@ -928,7 +938,7 @@ void agentController::resume(){
 	if (isServer){
 		if (server.setup(PORT)){
 			ofLogNotice("TCP") << "Successfully resumed Server";
-            gameState = GameStateReadyRoom;                                                                            // gameState  :  connected
+//            gameState = GameStateReadyRoom;                                                                            // gameState  :  connected
             stepInterval = 1000;
             step = 0;
             stepTimer = ofGetElapsedTimeMillis();
@@ -940,7 +950,7 @@ void agentController::resume(){
             if (client.setup(serverIP, PORT)){
                 ofLogNotice("TCP") << "Reconnected Client";
                 // this is not flushed out. game could be in progress, not in ready room
-                gameState = GameStateReadyRoom;                                                                         // gameState  :  connected
+//                gameState = GameStateReadyRoom;                                                                         // gameState  :  connected
                 stepInterval = 1000;
                 step = 0;
                 stepTimer = ofGetElapsedTimeMillis();
@@ -954,13 +964,13 @@ void agentController::exit() {
 	if (isServer){
         ofLogNotice("TCP") << "Shutting down Server";
         stopServer();
-        gameState = GameStateLogin;                                                                            // gameState  :  disconnected
+//        gameState = GameStateLogin;                                                                            // gameState  :  disconnected
         ofLogNotice("+++ GameState updated:") << "Waiting For Sign In, exit()";
 	}
 	if (isClient){
 		ofLogNotice("TCP") << "Shutting down Client";
 		client.close();
-        gameState = GameStateLogin;                                                                            // gameState  :  disconnected
+//        gameState = GameStateLogin;                                                                            // gameState  :  disconnected
         ofLogNotice("+++ GameState updated:") << "Waiting For Sign In, exit()";
 	}
 }
