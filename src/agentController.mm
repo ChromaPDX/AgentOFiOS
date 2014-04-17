@@ -24,7 +24,7 @@ void agentController::setup() {
     networkState = NetworkNone;
     currentTurn = 0;
 
-    // GRAPHICS
+    // TOUCHES
     width = ofGetWidth();
     height = ofGetHeight();
     centerX = ofGetWidth()/2.;
@@ -187,7 +187,10 @@ void agentController::updateState(ProgramState newState){
     stateBeginTime = ofGetElapsedTimeMillis();
     
     if(state == StateWelcomeScreen);
-    else if(state == StateConnectionScreen);
+    else if(state == StateConnectionScreen){
+        if (isServer){ stopServer(); isServer = false; }
+        if (isClient){ client.close(); isClient = false; }
+    }
     else if(state == StateJoinScreen);
     else if(state == StateReadyRoom);
     else if(state == StateStartGame){       // initiated by server sendMessage("stateStartGame")
@@ -356,35 +359,37 @@ void agentController::updateOnceASecond(){
 void agentController::update() {
     elapsedMillis = ofGetElapsedTimeMillis();  // reduce calls to ofGetElapsedTimeMillis();
     
+    // script advancement
+    
+    if(state == StateWelcomeScreen);
+    else if(state == StateConnectionScreen);
+    else if(state == StateJoinScreen);
+    else if(state == StateReadyRoom);
+    else if(state == StateStartGame){       // initiated by server sendMessage("stateStartGame")
+        if(elapsedMillis > stateBeginTime + 5000)
+            updateState(StateCountdown);
+    }
+    else if(state == StateCountdown){
+        if(elapsedMillis > stateBeginTime + 5000){
+            updateState(StateTurnScramble);
+            if (isServer)
+                serveRound(0);
+        }
+    }
+    else if(state == StateTurnScramble);
+    else if(state == StateTurnGesture);
+    else if(state == StateTurnComplete);    // initiated by server sendMessage("stateTurnComplete")
+    else if(state == StateDecide);          // initiated by server sendMessage("stateDecide")
+    else if(state == StateGameOver);        // initiated by server sendMessage "WIN" / "LOSE"
+
+    
+    
     updateOnceASecond();
     
     if (isClient || isServer) {
         
       	updateTCP();
         
-        // script advancement
-        
-        if(state == StateWelcomeScreen);
-        else if(state == StateConnectionScreen);
-        else if(state == StateJoinScreen);
-        else if(state == StateReadyRoom);
-        else if(state == StateStartGame){       // initiated by server sendMessage("stateStartGame")
-            if(elapsedMillis > stateBeginTime + 5000)
-                updateState(StateCountdown);
-        }
-        else if(state == StateCountdown){
-            if(elapsedMillis > stateBeginTime + 5000){
-                updateState(StateTurnScramble);
-                if (isServer)
-                    serveRound(0);
-            }
-        }
-        else if(state == StateTurnScramble);
-        else if(state == StateTurnGesture);
-        else if(state == StateTurnComplete);    // initiated by server sendMessage("stateTurnComplete")
-        else if(state == StateDecide);          // initiated by server sendMessage("stateDecide")
-        else if(state == StateGameOver);        // initiated by server sendMessage "WIN" / "LOSE"
-
         if (updateFunction != NULL) {
             (this->*updateFunction)();
         }
@@ -502,9 +507,32 @@ void agentController::countScores(){
 //--------------------------------------------------------------
 void agentController::touchBegan(int x, int y, int id){
     
-//    switch (gameState) {
-//            
-//        case GameStateLogin:
+    if(state == StateWelcomeScreen);
+    else if(state == StateConnectionScreen);
+    else if(state == StateJoinScreen);
+    else if(state == StateReadyRoom);
+    else if(state == StateStartGame);       // initiated by server sendMessage("stateStartGame")
+    else if(state == StateCountdown);
+    else if(state == StateTurnScramble);
+    else if(state == StateTurnGesture);
+    else if(state == StateTurnComplete);    // initiated by server sendMessage("stateTurnComplete")
+    else if(state == StateDecide);          // initiated by server sendMessage("stateDecide")
+    else if(state == StateGameOver);        // initiated by server sendMessage "WIN" / "LOSE"
+
+    
+    switch (state) {
+            
+        case StateConnectionScreen:
+        
+            if(x < centerX)
+                updateState(StateReadyRoom);
+            if(x > centerX)
+                updateState(StateJoinScreen);
+
+        break;
+            
+            
+//        case StateConnectionScreen:
 //            
 //            switch (loginState) {
 //                case LoginStateChoose:
@@ -598,52 +626,71 @@ void agentController::touchBegan(int x, int y, int id){
 //                    break;
 //            }
 //            break;
-//            
-//        case GameStateReadyRoom:
-//            
-//            if (y < height * .2) {
-//                gameState = GameStateLogin;
-//                loginState = LoginStateChoose;
-//                if (isServer){stopServer(); isServer = 0;}
-//                if (isClient){client.close(); isClient = 0;}
-//            }
-//            else if (isServer && connectedAgents > 1){
-//                sendMessage("stateStartGame");
-//                updateState(StateStartGame);
-//            }
-//            break;
-//            
-//        case GameStatePlaying:
-//            if (recordMode == RecordModeTouch) {
+            
+        case StateReadyRoom:
+            
+            // back button
+            if (y < height * .2) {
+                updateState(StateConnectionScreen);
+            }
+            // start game
+            else if (isServer){
+                if(connectedAgents > 2){
+                    sendMessage("stateStartGame");
+                    updateState(StateStartGame);
+                }
+                else{
+                    // deliver message: "game requires at least 3 players"
+                }
+            }
+            break;
+            
+        case StateTurnGesture:
+            if (recordMode == RecordModeTouch) {
 //                turnState = TurnStateActionSuccess;                                                                         // turnState  :  action success
-//                recordMode = RecordModeNothing;        // turn off recording
-//                recordedTimes[0] = ofGetElapsedTimeMillis() - turnTime;
-//                ((testApp*) ofGetAppPtr())->vibrate(true);
-//                if (isClient) {
-//                    sendMessage(ofToString(recordedTimes[0]));
-//                }
-//            }
-//            break;
-//            
-//        case GameStateDeciding:
-//            if (isServer) {
-//                pickedAgent(0);
-//            }
-//            else if (isClient){
-//                sendMessage("pickedAgent");
-//            }
-//            break;
-//            
-//        default:
-//            break;
-//    }
-    
-	//sendMessage("touch down");
+                updateState(StateTurnComplete);  // should this be happening here? is that what "complete" means?
+                recordMode = RecordModeNothing;        // turn off recording
+                recordedTimes[0] = ofGetElapsedTimeMillis() - turnTime;
+                ((testApp*) ofGetAppPtr())->vibrate(true);
+                if (isClient) {
+                    sendMessage(ofToString(recordedTimes[0]));
+                }
+            }
+            break;
+            
+        case StateDecide:
+            if (isServer) {
+                pickedAgent(0);
+            }
+            else if (isClient){
+                sendMessage("pickedAgent");
+            }
+            break;
+            
+        default:
+            break;
+    }
 }
 
 void agentController::touchMoved(int x, int y, int id) { }
 
-void agentController::touchEnded(int x, int y, int id) { }
+void agentController::touchEnded(int x, int y, int id) {
+    
+    if(state == StateWelcomeScreen){
+        updateState(StateConnectionScreen);
+    }
+    else if(state == StateConnectionScreen);
+    else if(state == StateJoinScreen);
+    else if(state == StateReadyRoom);
+    else if(state == StateStartGame);       // initiated by server sendMessage("stateStartGame")
+    else if(state == StateCountdown);
+    else if(state == StateTurnScramble);
+    else if(state == StateTurnGesture);
+    else if(state == StateTurnComplete);    // initiated by server sendMessage("stateTurnComplete")
+    else if(state == StateDecide);          // initiated by server sendMessage("stateDecide")
+    else if(state == StateGameOver);        // initiated by server sendMessage "WIN" / "LOSE"
+
+}
 
 float agentController::getMaxSensorScale(){
     float max = 0.;
@@ -963,14 +1010,10 @@ void agentController::resume(){
 void agentController::exit() {
 	if (isServer){
         ofLogNotice("TCP") << "Shutting down Server";
-        stopServer();
-//        gameState = GameStateLogin;                                                                            // gameState  :  disconnected
-        ofLogNotice("+++ GameState updated:") << "Waiting For Sign In, exit()";
+        updateState(StateConnectionScreen);
 	}
 	if (isClient){
 		ofLogNotice("TCP") << "Shutting down Client";
-		client.close();
-//        gameState = GameStateLogin;                                                                            // gameState  :  disconnected
-        ofLogNotice("+++ GameState updated:") << "Waiting For Sign In, exit()";
+        updateState(StateConnectionScreen);
 	}
 }

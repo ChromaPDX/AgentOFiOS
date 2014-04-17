@@ -44,6 +44,7 @@ private:
     int complementaries[21]; // indexes of primaries[] of complements to the primaries
     char spymess[5];  // scrambled text
     ofTrueTypeFont font;
+    ofTrueTypeFont fontTiny;
     ofTrueTypeFont fontSmall;
     ofTrueTypeFont fontMedium;
     ofTrueTypeFont fontLarge;

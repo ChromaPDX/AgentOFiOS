@@ -16,6 +16,7 @@ void AgentView::setup(){
     centerY = ofGetHeight()/2.;
     
     font.loadFont("Avenir.ttf", ofGetWidth() / 12., true, true);   // 4.2
+    fontTiny.loadFont("AvenirNextCondensed.ttf", ofGetWidth() / 20., true, true);
     fontSmall.loadFont("AvenirNextCondensed.ttf", ofGetWidth() / 16., true, true);
     fontMedium.loadFont("AvenirNextCondensed.ttf", ofGetWidth() / 12., true, true);
     fontLarge.loadFont("AvenirNextCondensed.ttf", ofGetWidth() / 8., true, true);
@@ -89,8 +90,7 @@ void AgentView::setWIFIExist(bool w){
 //
 
 //void AgentView::draw(GameState gameState, LoginStateState loginState, TurnState turnState, BOOL isSpy, int step, unsigned long stepInterval, unsigned long long stepTimer, BOOL isServer, BOOL isClient, int currentTurn)
-void AgentView::draw(ProgramState state, NetworkState networkState, long elapsedMillis, long stateBeginTime, BOOL isServer, BOOL isSpy)
-{
+void AgentView::draw(ProgramState state, NetworkState networkState, long elapsedMillis, long stateBeginTime, BOOL isServer, BOOL isSpy){
     
     ofClear(primaries[primaryColor]);
     
@@ -102,25 +102,33 @@ void AgentView::draw(ProgramState state, NetworkState networkState, long elapsed
 //        NetworkJoinSuccess,
 //        NetworkLostConnection,      // try to make these 2 into 1
 //        NetworkServerDisconnected   //
-
     
     if(state == StateWelcomeScreen){
+        fontLarge.drawString("DOUBLE AGENT", centerX - fontLarge.stringWidth("DOUBLE AGENT")/2., height*.2 - fontLarge.stringHeight("DOUBLE AGENT")/2.);
+        fontTiny.drawString("A GAME OF RIDICULOUS GESTURES", centerX - fontTiny.stringWidth("A GAME OF RIDICULOUS GESTURES")/2., height*.25 - fontTiny.stringHeight("A GAME OF RIDICULOUS GESTURES")/2.);
+        fontLarge.drawString("BEGIN", centerX - fontLarge.stringWidth("BEGIN")/2., height*.6 - fontLarge.stringHeight("BEGIN")/2.);
         string wifistr;
-        if(WIFIExist) wifistr = "WIFI connected";
-        else wifistr = "no connection, check WIFI";
+        if(WIFIExist) wifistr = ":) WIFI connected";
+        else wifistr = "(!) WIFI: game requires a WIFI connection";
+        fontSmall.drawString(wifistr, 10, height - fontSmall.stringHeight(wifistr)-10);
 
-        font.drawString(wifistr,ofGetWidth()/2 - font.stringWidth(wifistr)/2.,ofGetHeight()*.4 - font.stringHeight(wifistr)/2.);
-        font.drawString(wifistr,ofGetWidth()/2 - font.stringWidth(wifistr)/2.,ofGetHeight()*.6 - font.stringHeight(wifistr)/2.);
     }
     else if(state == StateConnectionScreen){
+        ofSetColor(255, 255);
+        fontLarge.drawString("DOUBLE AGENT", centerX - fontLarge.stringWidth("DOUBLE AGENT")/2., height*.2 - fontLarge.stringHeight("DOUBLE AGENT")/2.);
+        fontTiny.drawString("A GAME OF RIDICULOUS GESTURES", centerX - fontTiny.stringWidth("A GAME OF RIDICULOUS GESTURES")/2., height*.25 - fontTiny.stringHeight("A GAME OF RIDICULOUS GESTURES")/2.);
         string hostString = "HOST";
         string clientString = "JOIN";
         string backString = "< BACK";
         string thirdString;
         
         if(networkState == NetworkNone){
-            font.drawString("HOST",ofGetWidth()/2 - font.stringWidth("HOST")/2.,ofGetHeight()*.4 - font.stringHeight("HOST")/2.);
-            font.drawString("JOIN",ofGetWidth()/2 - font.stringWidth("JOIN")/2.,ofGetHeight()*.6 - font.stringHeight("JOIN")/2.);
+            font.drawString("HOST", width*.25 - font.stringWidth("HOST")/2., height*.6 - font.stringHeight("HOST")/2.);
+            font.drawString("JOIN", width*.75 - font.stringWidth("JOIN")/2., height*.6 - font.stringHeight("JOIN")/2.);
+            ofSetColor(255, 255);
+            ofDrawPlane(width*.5, height-75, width, 150);
+            ofSetColor(0,255);
+            fontTiny.drawString("ONLY ONE HOST IS NEEDED", width*.5 - fontTiny.stringWidth("ONLY ONE HOST IS NEEDED")/2., height - fontTiny.stringHeight("ONLY ONE HOST IS NEEDED"));
         }
 //    case LoginStateServer:
 //        hostString = "JOIN CODE";
@@ -133,7 +141,8 @@ void AgentView::draw(ProgramState state, NetworkState networkState, long elapsed
     }
     else if(state == StateJoinScreen){
 
-        if(networkState == NetworkJoinAttempt){
+//        if(networkState == NetworkJoinAttempt){
+        ofSetColor(255, 255);
             string hostString = "CODE";
             string clientString = controller->getCodeFromInt(controller->loginCode);
             string backString = "< BACK";
@@ -148,7 +157,7 @@ void AgentView::draw(ProgramState state, NetworkState networkState, long elapsed
             decrement.draw(width*.7, height*.525, width*.1, width*.1);
             hostString = "JOIN";
             font.drawString(hostString,ofGetWidth()/2 - font.stringWidth(hostString)/2.,ofGetHeight()*.75 - font.stringHeight(hostString)/2.);
-        }
+//        }
         
 //    case LoginStateConnecting:
 //        hostString = "CONNECTING TO";
@@ -271,8 +280,8 @@ void AgentView::draw(ProgramState state, NetworkState networkState, long elapsed
     
     // white bar at bottom
     //ofSetColor(primaries[complementaries[primaryColor*3+0]]);
-    ofSetColor(255, 255, 255);
-    ofDrawPlane(width*.5, height-125, width, 250);
+//    ofSetColor(255, 255, 255);
+//    ofDrawPlane(width*.5, height-125, width, 250);
     
 //    if (sta == GameStatePlaying || gameState == GameStateDeciding || gameState == GameStateGameOver) {
 //            
