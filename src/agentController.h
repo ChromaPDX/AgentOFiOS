@@ -71,6 +71,7 @@ private:
 	ofxTCPClient client;
 	std::string localIP;
 	std::string serverIP;
+    string makeServerIPString();
     string Rx;
     bool isClient = false;
     bool isServer = false;
@@ -80,7 +81,7 @@ private:
     void sendMessage(string message);   // if client, send to server.  if server, send to all clients
     int oneSecond;  // tracking time, preventing updateSlowTCP() redundant calls
     
-    bool doesWIFIExist();
+    bool isConnectedToWIFI();
     // SENSORS
 	ofVec3f accel, normAccel;
     ofVec3f filteredAccel;
@@ -122,6 +123,11 @@ private:
 //    void dramaticallyRevealYourRole();
     void updateState(ProgramState newState);
         long stateBeginTime;
+    void updateStateWithTransition(ProgramState newState, long delay);
+        long transitionEndTime;
+        long transitionDuration;
+        bool transitionActive = false;
+        ProgramState transitionTarget;
     void generateNewSpyRoles();   // initiated by server with "startGame"
 //    void countDown(int curstep);  // can be stepFunction
     void serveRound(int curstep); // can be stepFunction   (server only function)
@@ -131,8 +137,8 @@ private:
     
     // LOG IN DATA
     
-    int clientConnect();
-    int serverConnect();
+    bool clientConnect(string serverIP);
+    bool serverConnect();
     
     void stopServer();
     

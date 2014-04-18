@@ -37,6 +37,7 @@ ProgramState;
 typedef enum
 {
     NetworkNone,
+    NetworkWIFIConnect,
     NetworkHostAttempt,
     NetworkHostSuccess,
     NetworkJoinAttempt,

@@ -67,9 +67,14 @@ void AgentView::setup(){
     ofSetSphereResolution(24);
 
 }
-
 void AgentView::setWIFIExist(bool w){
     WIFIExist = w;
+}
+void AgentView::setIsServer(bool s){
+    isServer = s;
+}
+void AgentView::setIsSpy(bool s){
+    isSpy = s;
 }
 
 // draw function outline
@@ -90,9 +95,14 @@ void AgentView::setWIFIExist(bool w){
 //
 
 //void AgentView::draw(GameState gameState, LoginStateState loginState, TurnState turnState, BOOL isSpy, int step, unsigned long stepInterval, unsigned long long stepTimer, BOOL isServer, BOOL isClient, int currentTurn)
-void AgentView::draw(ProgramState state, NetworkState networkState, long elapsedMillis, long stateBeginTime, BOOL isServer, BOOL isSpy){
+void AgentView::draw(ProgramState state, NetworkState networkState, long elapsedMillis, long stateBeginTime, bool transitionActive, long transitionDuration, long transitionEndTime){
     
     ofClear(primaries[primaryColor]);
+    
+    if(transitionActive)
+        transition = (transitionEndTime-elapsedMillis)/(float)transitionDuration;
+    else
+        transition = 1.0;
     
     // network states
 //        NetworkNone,
@@ -114,7 +124,12 @@ void AgentView::draw(ProgramState state, NetworkState networkState, long elapsed
 
     }
     else if(state == StateConnectionScreen){
-        ofSetColor(255, 255);
+        int alpha = 255;
+        if(transitionActive){
+            alpha = 255*transition;
+            printf("%ld, %ld, %ld :: %d\n",elapsedMillis,transitionEndTime, transitionDuration,alpha);
+        }
+        ofSetColor(255, alpha);
         fontLarge.drawString("DOUBLE AGENT", centerX - fontLarge.stringWidth("DOUBLE AGENT")/2., height*.2 - fontLarge.stringHeight("DOUBLE AGENT")/2.);
         fontTiny.drawString("A GAME OF RIDICULOUS GESTURES", centerX - fontTiny.stringWidth("A GAME OF RIDICULOUS GESTURES")/2., height*.25 - fontTiny.stringHeight("A GAME OF RIDICULOUS GESTURES")/2.);
         string hostString = "HOST";
@@ -127,7 +142,7 @@ void AgentView::draw(ProgramState state, NetworkState networkState, long elapsed
             font.drawString("JOIN", width*.75 - font.stringWidth("JOIN")/2., height*.6 - font.stringHeight("JOIN")/2.);
             ofSetColor(255, 255);
             ofDrawPlane(width*.5, height-75, width, 150);
-            ofSetColor(0,255);
+            ofSetColor(0,alpha);
             fontTiny.drawString("ONLY ONE HOST IS NEEDED", width*.5 - fontTiny.stringWidth("ONLY ONE HOST IS NEEDED")/2., height - fontTiny.stringHeight("ONLY ONE HOST IS NEEDED"));
         }
 //    case LoginStateServer:
@@ -193,7 +208,33 @@ void AgentView::draw(ProgramState state, NetworkState networkState, long elapsed
 //        break;
     }
     else if(state == StateReadyRoom){
+//        drawAnimatedSphereBackground();
         
+        string backString = "< BACK";
+        fontMedium.drawString(backString,fontMedium.stringWidth(backString)*.35,ofGetHeight()*.1 - fontMedium.stringHeight(backString)/2.);
+        
+//        float fade = 255;
+//        if(step == 1 || step == 9)
+//            fade = 255. * (float)(ofGetElapsedTimeMillis() - stepTimer) / stepInterval;
+//        else if(step == 7 || step == 15)
+//            fade = 255. * (1 - (float)(ofGetElapsedTimeMillis() - stepTimer) / stepInterval );
+//        ofSetColor(255, 255, 255, fade);
+//        if(step >= 1 && step < 8)
+//            fontMedium.drawString("MESSAGE FROM HQ:\n\nWe have a detected\na double agent in your\nmidst. HQ will send\nthree encrypted commands\nfor all agents to\nenact simultaneously.", 20, centerY-200);
+//        else if(step >= 9 && step < 16)
+//            fontMedium.drawString("The double agent will\nonly receive scrambled\ncommands and will attempt\nto mimic the movements\nof the other agents.\nWatch your team closely!\n\nEND OF MESSAGE", 20, centerY-200);
+        
+        if (isServer){
+            ofSetColor(255);
+            
+            string hostString = "JOIN CODE";
+            string clientString = controller->getCodeFromIp();
+            fontMedium.drawString(hostString,width*.75 - fontMedium.stringWidth(hostString)/2.,ofGetHeight()*.1 - fontMedium.stringHeight(hostString)/2.);
+            font.drawString(clientString,width*.5 - font.stringWidth(clientString)/2.,ofGetHeight()*.25 - font.stringHeight(clientString)/2.);
+            
+            backString = "START";
+            fontMedium.drawString(backString,width*.5 - fontMedium.stringWidth(backString)*.5,height*.75 - fontMedium.stringHeight(backString)/2.);
+        }
     }
     else if(state == StateStartGame){
         if(elapsedMillis > stateBeginTime + 1000){
@@ -239,43 +280,6 @@ void AgentView::draw(ProgramState state, NetworkState networkState, long elapsed
     }
     else if(state == StateGameOver){
         
-    }
-    
-
-    
-    
-    
-    
-    
-
-    else if(state == StateReadyRoom){
-//        drawAnimatedSphereBackground();
-        
-        string backString = "< BACK";
-        fontMedium.drawString(backString,fontMedium.stringWidth(backString)*.35,ofGetHeight()*.1 - fontMedium.stringHeight(backString)/2.);
-        
-//        float fade = 255;
-//        if(step == 1 || step == 9)
-//            fade = 255. * (float)(ofGetElapsedTimeMillis() - stepTimer) / stepInterval;
-//        else if(step == 7 || step == 15)
-//            fade = 255. * (1 - (float)(ofGetElapsedTimeMillis() - stepTimer) / stepInterval );
-//        ofSetColor(255, 255, 255, fade);
-//        if(step >= 1 && step < 8)
-//            fontMedium.drawString("MESSAGE FROM HQ:\n\nWe have a detected\na double agent in your\nmidst. HQ will send\nthree encrypted commands\nfor all agents to\nenact simultaneously.", 20, centerY-200);
-//        else if(step >= 9 && step < 16)
-//            fontMedium.drawString("The double agent will\nonly receive scrambled\ncommands and will attempt\nto mimic the movements\nof the other agents.\nWatch your team closely!\n\nEND OF MESSAGE", 20, centerY-200);
-        
-        if (isServer){
-            ofSetColor(255);
-            
-            string hostString = "JOIN CODE";
-            string clientString = controller->getCodeFromIp();
-            fontMedium.drawString(hostString,width*.75 - fontMedium.stringWidth(hostString)/2.,ofGetHeight()*.1 - fontMedium.stringHeight(hostString)/2.);
-            font.drawString(clientString,width*.5 - font.stringWidth(clientString)/2.,ofGetHeight()*.25 - font.stringHeight(clientString)/2.);
-            
-            backString = "START";
-            fontMedium.drawString(backString,width*.5 - fontMedium.stringWidth(backString)*.5,height*.75 - fontMedium.stringHeight(backString)/2.);
-        }
     }
     
     // white bar at bottom

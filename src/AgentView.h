@@ -21,16 +21,21 @@ class AgentView{
 public:
     
     void setup(); // must be called
-    void draw(ProgramState state, NetworkState networkState, long elapsedMillis, long stateBeginTime, BOOL isServer, BOOL isSpy);
-    
-//    void draw(GameState gameState, LoginStateState loginState, TurnState turnState, BOOL isSpy, int step, unsigned long stepInterval, unsigned long long stepTimer, BOOL isServer, BOOL isClient, int currentTurn);
+    void draw(ProgramState state, NetworkState networkState, long elapsedMillis, long stateBeginTime, bool transitionActive, long transitionDuration, long transitionEndTime);
 
     agentController *controller;
     
     void setWIFIExist(bool w);
+    void setIsServer(bool s);
+    void setIsSpy(bool s);
+
 private:
     
     bool WIFIExist;
+    bool isServer;
+    bool isSpy;
+    
+    float transition;
 
 //    void drawLoginScreen(LoginStateState loginState);
     void drawInGameBackground();
