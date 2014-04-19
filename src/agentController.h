@@ -60,6 +60,12 @@ public:
 
     bool useScrambledText;    // (true: display spyMess, false: mainMessage) dynamically switches on DAs phone, and everybody elses, remains true on DAs phone during execute function
 
+    char avatarSelf = 1;  // your own avatar
+    // storing your friends' avatar information
+    char avatarIcons[256];
+    char avatarColors[256];
+    short avatarNum;
+
 private:
     
     // these are duplicated from the View. presently required for touch. try to get these out of here

@@ -65,7 +65,23 @@ void AgentView::setup(){
     // might be getting rid of sphere
     sphere.setRadius( ofGetWidth()  );
     ofSetSphereResolution(24);
-
+    
+    avatars[1].loadImage("ape.png");
+    avatars[2].loadImage("bear.png");
+    avatars[3].loadImage("eagle.png");
+    avatars[4].loadImage("horse.png");
+    avatars[5].loadImage("lion.png");
+    avatars[6].loadImage("moth.png");
+    avatars[7].loadImage("owl.png");
+    avatars[8].loadImage("snake.png");
+    avatars[1].setAnchorPercent(.5f, .5f);
+    avatars[2].setAnchorPercent(.5f, .5f);
+    avatars[3].setAnchorPercent(.5f, .5f);
+    avatars[4].setAnchorPercent(.5f, .5f);
+    avatars[5].setAnchorPercent(.5f, .5f);
+    avatars[6].setAnchorPercent(.5f, .5f);
+    avatars[7].setAnchorPercent(.5f, .5f);
+    avatars[8].setAnchorPercent(.5f, .5f);
 }
 void AgentView::setWIFIExist(bool w){
     WIFIExist = w;
@@ -127,7 +143,6 @@ void AgentView::draw(ProgramState state, NetworkState networkState, long elapsed
         int alpha = 255;
         if(transitionActive){
             alpha = 255*transition;
-            printf("%ld, %ld, %ld :: %d\n",elapsedMillis,transitionEndTime, transitionDuration,alpha);
         }
         ofSetColor(255, alpha);
         fontLarge.drawString("DOUBLE AGENT", centerX - fontLarge.stringWidth("DOUBLE AGENT")/2., height*.2 - fontLarge.stringHeight("DOUBLE AGENT")/2.);
@@ -136,6 +151,10 @@ void AgentView::draw(ProgramState state, NetworkState networkState, long elapsed
         string clientString = "JOIN";
         string backString = "< BACK";
         string thirdString;
+        
+
+        avatars[controller->avatarSelf].draw(centerX, height*.75, 100, 100);
+
         
         if(networkState == NetworkNone){
             font.drawString("HOST", width*.25 - font.stringWidth("HOST")/2., height*.6 - font.stringHeight("HOST")/2.);
@@ -156,6 +175,10 @@ void AgentView::draw(ProgramState state, NetworkState networkState, long elapsed
     }
     else if(state == StateJoinScreen){
 
+        
+        avatars[controller->avatarSelf].draw(centerX, height*.75, 100, 100);
+
+        
 //        if(networkState == NetworkJoinAttempt){
         ofSetColor(255, 255);
             string hostString = "CODE";
@@ -212,7 +235,19 @@ void AgentView::draw(ProgramState state, NetworkState networkState, long elapsed
         
         string backString = "< BACK";
         fontMedium.drawString(backString,fontMedium.stringWidth(backString)*.35,ofGetHeight()*.1 - fontMedium.stringHeight(backString)/2.);
-        
+
+        if(isServer)
+            avatars[controller->avatarSelf].draw(centerX, height*.75, 150, 150);
+
+        for(int i = 0; i < 256; i++){
+            if(controller->avatarIcons[i] != 0){
+                ofSetColor(primaries[controller->avatarColors[i]-1]);
+                ofDrawPlane(centerX, height*.45+height*.2*i, 150, 150);
+                ofSetColor(255, 255);
+                avatars[controller->avatarIcons[i]].draw(centerX, height*.45+height*.2*i, 150, 150);
+            }
+        }
+
 //        float fade = 255;
 //        if(step == 1 || step == 9)
 //            fade = 255. * (float)(ofGetElapsedTimeMillis() - stepTimer) / stepInterval;

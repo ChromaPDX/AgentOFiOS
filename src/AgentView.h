@@ -28,12 +28,15 @@ public:
     void setWIFIExist(bool w);
     void setIsServer(bool s);
     void setIsSpy(bool s);
+    int primaryColor;       // what is your color this round?
 
 private:
     
     bool WIFIExist;
     bool isServer;
     bool isSpy;
+    
+    ofImage avatars[9];
     
     float transition;
 
@@ -44,7 +47,6 @@ private:
     int width, height;
     int centerX, centerY;  // screen Coords
     
-    int primaryColor;       // what is your color this round?
     ofColor primaries[7];   // 7 colors
     int complementaries[21]; // indexes of primaries[] of complements to the primaries
     char spymess[5];  // scrambled text

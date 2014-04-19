@@ -58,7 +58,19 @@ void agentController::exit() {
 
 void agentController::updateSlowTCP(){
     if(isServer){
-        sendMessage(ofToString(connectedAgents));   // send number of clients
+        string clientString;
+        clientString.push_back('$');
+        clientString.push_back(avatarSelf);
+        clientString.push_back(agentView.primaryColor+1);
+        for(int i = 0; i < server.getLastID(); i++){
+            if(server.isClientConnected(i)){
+                clientString.push_back('$');
+                clientString.push_back(avatarIcons[i]);
+                clientString.push_back(avatarColors[i]);
+            }
+        }
+        sendMessage(clientString);
+//        sendMessage(ofToString(connectedAgents));   // send number of clients
     }
 //    else if (isClient) { }
 }
@@ -82,11 +94,23 @@ void agentController::updateTCP() {
                         // client's screen got touched during the end of game decision time
                         pickedAgent(i+1);
                     }
+                    else if (Rx[0] == '$'){
+                        if(Rx.size() == 3){
+                            avatarIcons[i] = Rx[1];
+                            avatarColors[i] = Rx[2];
+                            printf("client connected! %d %d",avatarIcons[i], avatarColors[i]);
+                        }
+                    }
                     else {
                         // must be the client sending back performance data for turn gesture
                         recordedTimes[i+1] = ofToInt(Rx);
                     }
                 }
+            }
+            else{
+                // manage avatars, clear disconnected clients off the stack
+                avatarIcons[i] = 0;
+                avatarColors[i] = 0;
             }
 	    }
 	}
@@ -141,6 +165,20 @@ void agentController::updateTCP() {
                 updateState(StateGameOver);
                 stepTimer = ofGetElapsedTimeMillis();
                 stepInterval = 5000;
+            }
+            else if (Rx[0] == '$'){
+                std::vector<std::string> players;
+                players = ofSplitString(Rx,"$");
+                printf("$ FIRST CHAR DOLLAR SIGN $\n");
+                avatarNum = 0;
+                for(int i = 0; i < players.size(); i++){
+                    if(players[i].size() == 2){
+                        avatarIcons[avatarNum] = players[i][0];
+                        avatarColors[avatarNum] = players[i][1];
+                        avatarNum++;
+                    }
+                }
+                printf("UPDATED FRIEND COUNT: %d",avatarNum);
             }
             else {
                 // improve this.
@@ -586,8 +624,12 @@ void agentController::touchBegan(int x, int y, int id){
             serverIP = makeServerIPString();
             isClient = clientConnect(serverIP);
             if(isClient){
+                char identity[3];
+                identity[0] = '$';
+                identity[1] = avatarSelf;
+                identity[2] = agentView.primaryColor+1;
+                sendMessage(identity);
                 mainMessage = "";  // "Agent"
-                isClient = true;
                 updateState(StateReadyRoom);                                                                          // gameState  :  connected
             }
             else {
@@ -694,6 +736,8 @@ void agentController::touchMoved(int x, int y, int id) { }
 void agentController::touchEnded(int x, int y, int id) {
     
     if(state == StateWelcomeScreen){
+        avatarSelf = ofRandom(1, 9);
+        printf("AVATAR CHOSE: %d\n",avatarSelf);
         updateState(StateConnectionScreen);
     }
     else if(state == StateConnectionScreen){
