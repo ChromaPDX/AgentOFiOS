@@ -61,6 +61,12 @@ private:
     ofImage reticleInside;
     ofImage fingerPrint;
     ofImage insideCircle;
+    
+    ofImage wifiImage;
+    ofImage circleWhite;
+    ofImage circleBlack;
+    ofImage circleShadow;
+    
     string mainMessage;
     
     ofImage increment;

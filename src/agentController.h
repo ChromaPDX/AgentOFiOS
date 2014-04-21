@@ -105,11 +105,11 @@ private:
     NetworkState networkState = NetworkNone;
 //    GameState gameState;
 //    TurnState turnState;
-    int step;  // game loop interval. used for countdowns and rounds, increments to 3 for countdown, increments to TURNS*3 for rounds
-    int numSteps;  // sets the ceiling of each countdown and round. 3 for countdowns, TURNS*3 for rounds
-    int currentTurn;   // resets to 0 each new round
-    unsigned long stepInterval;  // period between a step
-    unsigned long long stepTimer;  // timestamp beginning of a step to offset against
+//    int step;  // game loop interval. used for countdowns and rounds, increments to 3 for countdown, increments to TURNS*3 for rounds
+//    int numSteps;  // sets the ceiling of each countdown and round. 3 for countdowns, TURNS*3 for rounds
+//    unsigned long stepInterval;  // period between a step
+//    unsigned long long stepTimer;  // timestamp beginning of a step to offset against
+    int turnNumber;   // resets to 0 each new round
     string placeString[NUM_PLACES] = {"DATA SENT","DATA SENT","DATA SENT","DATA SENT","DATA SENT","DATA SENT","DATA SENT","DATA SENT"};//{"1st","2nd","3rd","4th","5th","6th","7th","8th"};
     string actionString[NUM_GESTURES] = {"NOTHING","JUMP","TOUCH SCREEN","SHAKE PHONE","SPIN","HIGH FIVE\nNEIGHBOR","POINT AT\nAN AGENT","FREEZE","CROUCH","STAND ON\nONE LEG","TOUCH PHONE\nWITH NOSE","RAISE\nA HAND","RUN IN PLACE"};
     bool actionHasOccurred(string message);     // prevent repeating actions per round
@@ -122,9 +122,11 @@ private:
 //    int pickerAccordingToServer;  // not used anymore
     int spyAccordingToServer;
     
-    typedef void (*StepFunctionPtr)(int);
-    void (agentController::*stepFunction)(int);
-    void (agentController::*updateFunction)() = NULL;
+    void serverInitiateRound();
+    
+//    typedef void (*StepFunctionPtr)(int);
+//    void (agentController::*stepFunction)(int);
+//    void (agentController::*updateFunction)() = NULL;
 
 //    void dramaticallyRevealYourRole();
     void updateState(ProgramState newState);
@@ -135,8 +137,7 @@ private:
         bool transitionActive = false;
         ProgramState transitionTarget;
     void generateNewSpyRoles();   // initiated by server with "startGame"
-//    void countDown(int curstep);  // can be stepFunction
-    void serveRound(int curstep); // can be stepFunction   (server only function)
+
     void execute(string gesture);   // the moment a turn begins, timers start
     void countScores();       // server only
     void pickedAgent(int agent);

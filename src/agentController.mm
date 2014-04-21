@@ -22,7 +22,7 @@ void agentController::setup() {
     // GAME / PROGRAM
     updateState(StateWelcomeScreen);
     networkState = NetworkNone;
-    currentTurn = 0;
+    turnNumber = 0;
 
     // TOUCHES
     width = ofGetWidth();
@@ -95,6 +95,9 @@ void agentController::updateTCP() {
                         pickedAgent(i+1);
                     }
                     else if (Rx[0] == '$'){
+                        // dollar sign encoding: connected players info, $cc$cc$cc$cc... etc.
+                        // first char is avatar animal, second is color
+                        // first element is server
                         if(Rx.size() == 3){
                             avatarIcons[i] = Rx[1];
                             avatarColors[i] = Rx[2];
@@ -157,16 +160,15 @@ void agentController::updateTCP() {
             else if (strcmp(receivedText, "WIN") == 0) {
                 mainMessage = "SPY CAPTURED!";
                 updateState(StateGameOver);
-                stepTimer = ofGetElapsedTimeMillis();
-                stepInterval = 5000;
             }
             else if (strcmp(receivedText, "LOSE") == 0) {
                 mainMessage = "NOPE!";
                 updateState(StateGameOver);
-                stepTimer = ofGetElapsedTimeMillis();
-                stepInterval = 5000;
             }
             else if (Rx[0] == '$'){
+                // dollar sign encoding: connected players info, $cc$cc$cc$cc... etc.
+                // first char is avatar animal, second is color
+                // first element is server
                 std::vector<std::string> players;
                 players = ofSplitString(Rx,"$");
                 printf("$ FIRST CHAR DOLLAR SIGN $\n");
@@ -192,7 +194,7 @@ void agentController::updateTCP() {
                         mainMessage = Rx;
                         wasTurnRelated = true;
                         updateState(StateTurnScramble);
-                        currentTurn++;
+                        turnNumber++;
                     }
                 }
 //                for (int g = 0; g < NUM_PLACES; g++) {
@@ -299,70 +301,24 @@ void agentController::generateNewSpyRoles(){
     }
 }
 
-// server only function
-void agentController::serveRound(int curstep){
-    
-    // initiate round
-    if (!curstep) {
-        for(int i = 0; i < NUM_TURNS; i++)
-            previousActions[i] = "";
-        step = 0;
-        stepInterval = 5000;
-        numSteps = NUM_TURNS*3;
-        stepTimer = ofGetElapsedTimeMillis();
-        stepFunction = &agentController::serveRound;
-    }
-    if (curstep == numSteps) {
-       
-        mainMessage = "OPERATIVE I.D.";  // everyone
-        
-        for(int i = 0; i < server.getLastID(); i++) {  // getLastID is UID of all clients
-            if( server.isClientConnected(i) ) { // check and see if it's still around
-                server.send(i,"stateDecide");
-            }
-	    }
-        stepInterval = 0;
-//        gameState = GameStateDeciding;                                                                                      // gameState  :  deciding
-//        turnState = TurnStateNotActive;
+void agentController::serverInitiateRound(){
+    // decide on a new gesture
+    do {
+        mainMessage = actionString[rand()%(NUM_GESTURES-1) + 1];
+    } while (actionHasOccurred(mainMessage));
+    // store it in the first vacant spot in the previousActions array
+    bool placed = false;
+    for(int i = 0; i < NUM_TURNS; i++){
+        if(!placed && strcmp(previousActions[i].c_str(), "") == 0){
+            previousActions[i] = mainMessage;
+            placed = true;
+        }
     }
     
-    else if (curstep %3 == 0) { // MESSAGE
-        
-        for (int i = 0 ; i < 16; i++) {
-            recordedTimes[i] = 5000 + i;
-        }
-        // find a gesture which has not yet occurred
-        do {
-            mainMessage = actionString[rand()%(NUM_GESTURES-1) + 1];
-        } while (actionHasOccurred(mainMessage));
-        // store it in the first vacant spot in the previousActions array
-        bool placed = false;
-        for(int i = 0; i < NUM_TURNS; i++){
-            if(!placed && strcmp(previousActions[i].c_str(), "") == 0){
-                previousActions[i] = mainMessage;
-                placed = true;
-            }
-        }
-        
-        useScrambledText = true;   // everyone begins with scrambled text
-        animatedScrambleFont = true;
-        sendMessage(mainMessage);
-        ((testApp*) ofGetAppPtr())->vibrate(true);
-//        turnState = TurnStateReceivingScrambled;                                                                            // turnState  :  scrambled       (server)
-        stepInterval = 1000 + rand() % 3000;
-        currentTurn++;
-    }
-    else if (curstep%3 == 1) { // EXCECUTE
-        sendMessage("execute");
-        stepInterval = ACTION_TIME;
-        execute(mainMessage);
-    }
-    else if (curstep%3 == 2) { // RESULTS
-//        countScores();
-        useScrambledText = false;
-//        turnState = TurnStateWaiting;                                                                                       // turnState  :  waiting        (server)
-        stepInterval = 6000;
-    }
+    useScrambledText = true;   // everyone begins with scrambled text
+    animatedScrambleFont = true;
+    sendMessage(mainMessage);
+    ((testApp*) ofGetAppPtr())->vibrate(true);
 }
 
 bool agentController::actionHasOccurred(string message){
@@ -374,8 +330,7 @@ bool agentController::actionHasOccurred(string message){
 }
 
 void agentController::execute(string gesture){
-    
-//    turnState = TurnStateAction;                                                                                            // turnState  :  action
+
     animatedScrambleFont = false;
     if(!isSpy){
         useScrambledText = false;
@@ -414,24 +369,21 @@ void agentController::execute(string gesture){
         recordMode = RecordModeNothing;
     }
     turnTime = ofGetElapsedTimeMillis();
+    
+    updateState(StateTurnGesture);
 }
 
 // server only function, i think
 void agentController::pickedAgent(int agent) {
     
     if(agent == spyAccordingToServer){
-        //sendMessage("agentDiscovered");
         mainMessage = "WIN";
         sendMessage(mainMessage);
     }
     else {
-        //sendMessage("agentNotDiscovered");
         mainMessage = "LOSE";
         sendMessage(mainMessage);
     }
-    //    gameState = GameStateGameOver;                                                                                          // gameState
-    stepTimer = ofGetElapsedTimeMillis();
-    stepInterval = 5000;
 }
 
 
@@ -472,7 +424,6 @@ void agentController::countScores(){
 //            mainMessage = placeString[i];
 //        }
 //    }
-
 }
 
 
@@ -496,12 +447,10 @@ void agentController::updateState(ProgramState newState){
         if(isServer)
             generateNewSpyRoles();
     }
-    else if(state == StateCountdown){
-        currentTurn = 0;
-    }
-    else if(state == StateTurnScramble);
-    else if(state == StateTurnGesture);
-    else if(state == StateTurnComplete);    // initiated by server sendMessage("stateTurnComplete")
+    else if(state == StateCountdown);
+    else if(state == StateTurnScramble);   // server initiated by sendMessage(gesture)
+    else if(state == StateTurnGesture);  // server initiated at the end of execute()
+    else if(state == StateTurnComplete);    // server initiated by sendMessage("stateTurnComplete")
     else if(state == StateDecide);          // initiated by server sendMessage("stateDecide")
     else if(state == StateGameOver);        // initiated by server sendMessage "WIN" / "LOSE"
 }
@@ -517,6 +466,7 @@ void agentController::updateStateWithTransition(ProgramState newState, long dela
 }
 
 // the update loop. once/drawTime
+// inside each block, update stuff first, then only at the end call updateState(newState)
 
 void agentController::update() {
     elapsedMillis = ofGetElapsedTimeMillis();  // reduce calls to ofGetElapsedTimeMillis();
@@ -535,19 +485,57 @@ void agentController::update() {
     else if(state == StateJoinScreen);
     else if(state == StateReadyRoom);
     else if(state == StateStartGame){       // initiated by server sendMessage("stateStartGame")
-        if(elapsedMillis > stateBeginTime + 5000)
+        if(elapsedMillis > stateBeginTime + 5000){
+            turnNumber = 0;
             updateState(StateCountdown);
+        }
     }
     else if(state == StateCountdown){
         if(elapsedMillis > stateBeginTime + 5000){
-            updateState(StateTurnScramble);
-            if (isServer)
-                serveRound(0);
+            if (isServer){
+                // setup new game
+                turnNumber = 0;
+                for(int i = 0; i < NUM_TURNS; i++)
+                    previousActions[i] = "";
+                // begin game
+                serverInitiateRound();
+                updateState(StateTurnScramble);
+            }
         }
     }
-    else if(state == StateTurnScramble);
-    else if(state == StateTurnGesture);
-    else if(state == StateTurnComplete);    // initiated by server sendMessage("stateTurnComplete")
+    else if(state == StateTurnScramble){
+        if(isServer && elapsedMillis > stateBeginTime + 1500){
+            // delay by random amount
+            // test feeling for duration
+            //if(ofRandom(0, 40) == 0){
+                sendMessage("execute");
+                execute(mainMessage);
+            //}
+        }
+    }
+    else if(state == StateTurnGesture){
+        if(elapsedMillis > stateBeginTime + ACTION_TIME)
+            updateState(StateTurnComplete);
+    }
+    else if(state == StateTurnComplete){    // initiated by server sendMessage("stateTurnComplete")
+        if(isServer && elapsedMillis > stateBeginTime + 3000){
+            // increment turn
+            turnNumber++;
+            if(turnNumber < NUM_TURNS){
+                serverInitiateRound();
+                updateState(StateTurnScramble);
+            }
+            else{
+                for(int i = 0; i < server.getLastID(); i++) {  // getLastID is UID of all clients
+                    if( server.isClientConnected(i) ) { // check and see if it's still around
+                        server.send(i,"stateDecide");
+                    }
+                }
+                mainMessage = "OPERATIVE I.D.";  // everyone
+                updateState(StateDecide);
+            }
+        }
+    }
     else if(state == StateDecide);          // initiated by server sendMessage("stateDecide")
     else if(state == StateGameOver);        // initiated by server sendMessage "WIN" / "LOSE"
 
@@ -560,26 +548,27 @@ void agentController::update() {
         if(isClient || isServer){
             updateSlowTCP();
         }
-        if(state == StateWelcomeScreen)
+        if(state == StateWelcomeScreen){
             agentView.setWIFIExist(isConnectedToWIFI());
+        }
     }
     ////////////////////////////////////////////////////////////
-
+        
     if (isClient || isServer) {
         
-      	updateTCP();
-        
-        if (updateFunction != NULL) {
-            (this->*updateFunction)();
-        }
-        
+        updateTCP();
+    }
+}
+
+
+
 //        if(turnState == TurnStateAction){
 //            float turnProgress = (float)(ofGetElapsedTimeMillis() - turnTime) / ACTION_TIME;   // from 0 to 1
 //            int index = SENSOR_DATA_ARRAY_SIZE*turnProgress;
 //            if(index < 0) index = 0;
 //            if(index >= SENSOR_DATA_ARRAY_SIZE) index = SENSOR_DATA_ARRAY_SIZE-1;
 //            float maxScale = 4*getMaxSensorScale() + 1.;
-//            recordedSensorData[(currentTurn-1)*SENSOR_DATA_ARRAY_SIZE + index] = maxScale;
+//            recordedSensorData[(turnNumber-1)*SENSOR_DATA_ARRAY_SIZE + index] = maxScale;
 //        }
 //
         
@@ -609,8 +598,7 @@ void agentController::update() {
 //                }
 //            }
 //        }
-    }
-}
+
 
 #pragma mark SENSORS
 
@@ -901,69 +889,48 @@ void agentController::setIpAddress(const char* ipAddress){
 	}
 }
 
-
 string agentController::getCodeFromInt(int num){
     
     string codeString = paddedString(num);
-    
-    char code[8];
-    
+    char code[6];
+    // spaces inbetween 3 number characters
     code[1] = ' ';
-    code[2] = ' ';
-    code[4] = ' ';
-    code[5] = ' ';
-    
+    code[3] = ' ';
     const char* last = codeString.c_str();
     code[0] = last[0];
-    code[3] = last[1];
-    code[6] = last[2];
-    code[7] = '\0';
-    
+    code[2] = last[1];
+    code[4] = last[2];
+    code[5] = '\0';
     return string(code);
 }
 
 string agentController::getCodeFromIp(){
-    
     if (localIP.compare("error") == 0 || !localIP.length()) return "error";
     
     std::vector<std::string> result;
-    
     result = ofSplitString(localIP,".");
-    
-    
     if (result[3].length() < 3){
-        
-        char code[8];
-        
+        char code[6];
+        // spaces inbetween 3 number characters
         code[1] = ' ';
-        code[2] = ' ';
-        code[4] = ' ';
-        code[5] = ' ';
-        
+        code[3] = ' ';
         const char* last = result[3].c_str();
         code[0] = '0';
-        code[3] = last[0];
-        code[6] = last[1];
-        code[7] = '\0';
-        
+        code[2] = last[0];
+        code[4] = last[1];
+        code[5] = '\0';
         return string(code);
-        
     }
-    
     else {
-        char code[8];
-        
+        char code[6];
+        // spaces inbetween 3 number characters
         code[1] = ' ';
-        code[2] = ' ';
-        code[4] = ' ';
-        code[5] = ' ';
-        
+        code[3] = ' ';
         const char* last = result[3].c_str();
         code[0] = last[0];
-        code[3] = last[1];
-        code[6] = last[2];
-        code[7] = '\0';
-        
+        code[2] = last[1];
+        code[4] = last[2];
+        code[5] = '\0';
         return string(code);
     }
 }

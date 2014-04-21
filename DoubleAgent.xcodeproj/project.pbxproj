@@ -53,6 +53,10 @@
 		D53FA2E91901B01900A5D0CC /* moth.png in Resources */ = {isa = PBXBuildFile; fileRef = D53FA2E11901B01900A5D0CC /* moth.png */; };
 		D53FA2EA1901B01900A5D0CC /* owl.png in Resources */ = {isa = PBXBuildFile; fileRef = D53FA2E21901B01900A5D0CC /* owl.png */; };
 		D53FA2EB1901B01900A5D0CC /* snake.png in Resources */ = {isa = PBXBuildFile; fileRef = D53FA2E31901B01900A5D0CC /* snake.png */; };
+		D53FA2F21905B27000A5D0CC /* circleBlack.png in Resources */ = {isa = PBXBuildFile; fileRef = D53FA2F01905B27000A5D0CC /* circleBlack.png */; };
+		D53FA2F31905B27000A5D0CC /* circleWhite.png in Resources */ = {isa = PBXBuildFile; fileRef = D53FA2F11905B27000A5D0CC /* circleWhite.png */; };
+		D53FA2F51905B44D00A5D0CC /* circleShadow.png in Resources */ = {isa = PBXBuildFile; fileRef = D53FA2F41905B44D00A5D0CC /* circleShadow.png */; };
+		D53FA2F71905B4E000A5D0CC /* wifi.png in Resources */ = {isa = PBXBuildFile; fileRef = D53FA2F61905B4E000A5D0CC /* wifi.png */; };
 		D577837A188F12B80038156E /* inside_circle.png in Resources */ = {isa = PBXBuildFile; fileRef = D5778379188F12B80038156E /* inside_circle.png */; };
 		D577837C188F206F0038156E /* reticle_inside.png in Resources */ = {isa = PBXBuildFile; fileRef = D577837B188F206F0038156E /* reticle_inside.png */; };
 		D5961C4318F882E300978303 /* AgentView.mm in Sources */ = {isa = PBXBuildFile; fileRef = D5961C4118F882E300978303 /* AgentView.mm */; };
@@ -161,6 +165,10 @@
 		D53FA2E11901B01900A5D0CC /* moth.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = moth.png; path = avatars/moth.png; sourceTree = "<group>"; };
 		D53FA2E21901B01900A5D0CC /* owl.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = owl.png; path = avatars/owl.png; sourceTree = "<group>"; };
 		D53FA2E31901B01900A5D0CC /* snake.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = snake.png; path = avatars/snake.png; sourceTree = "<group>"; };
+		D53FA2F01905B27000A5D0CC /* circleBlack.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = circleBlack.png; sourceTree = "<group>"; };
+		D53FA2F11905B27000A5D0CC /* circleWhite.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = circleWhite.png; sourceTree = "<group>"; };
+		D53FA2F41905B44D00A5D0CC /* circleShadow.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = circleShadow.png; sourceTree = "<group>"; };
+		D53FA2F61905B4E000A5D0CC /* wifi.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = wifi.png; sourceTree = "<group>"; };
 		D5778379188F12B80038156E /* inside_circle.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = inside_circle.png; sourceTree = "<group>"; };
 		D577837B188F206F0038156E /* reticle_inside.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = reticle_inside.png; sourceTree = "<group>"; };
 		D5961C4118F882E300978303 /* AgentView.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = AgentView.mm; sourceTree = "<group>"; };
@@ -446,6 +454,10 @@
 				D5961C4118F882E300978303 /* AgentView.mm */,
 				61E1E184187395D1006EF1AB /* ofxTimer.mm */,
 				61E1E185187395D1006EF1AB /* ofxTimer.h */,
+				D53FA2F61905B4E000A5D0CC /* wifi.png */,
+				D53FA2F01905B27000A5D0CC /* circleBlack.png */,
+				D53FA2F11905B27000A5D0CC /* circleWhite.png */,
+				D53FA2F41905B44D00A5D0CC /* circleShadow.png */,
 				D51BE0B5188DF21B00359972 /* reticle_outline.png */,
 				D51BE0B6188DF21B00359972 /* reticle_compass.png */,
 				D5778379188F12B80038156E /* inside_circle.png */,
@@ -560,16 +572,20 @@
 			files = (
 				E41D3ED713B38FB500A75A5D /* Project.xcconfig in Resources */,
 				D577837A188F12B80038156E /* inside_circle.png in Resources */,
+				D53FA2F71905B4E000A5D0CC /* wifi.png in Resources */,
 				E41D3EE613B3906D00A75A5D /* CoreOF.xcconfig in Resources */,
 				678E130817951530005B6D19 /* Icon@2x.png in Resources */,
+				D53FA2F21905B27000A5D0CC /* circleBlack.png in Resources */,
 				D53FA2E61901B01900A5D0CC /* eagle.png in Resources */,
 				D51BE0B8188DF21B00359972 /* reticle_compass.png in Resources */,
+				D53FA2F51905B44D00A5D0CC /* circleShadow.png in Resources */,
 				61ED8A1A18AEE4C2002333A6 /* increment.png in Resources */,
 				61E1E17F187367DE006EF1AB /* Instructions.txt in Resources */,
 				D53FA2E81901B01900A5D0CC /* lion.png in Resources */,
 				678E130A17951536005B6D19 /* Icon.png in Resources */,
 				D5D387C31891E3E200208CD3 /* inside_circle_w_fade.png in Resources */,
 				61ED8A1918AEE4C2002333A6 /* decrement.png in Resources */,
+				D53FA2F31905B27000A5D0CC /* circleWhite.png in Resources */,
 				678E130C1795153C005B6D19 /* Default.png in Resources */,
 				D53FA2E51901B01900A5D0CC /* bear.png in Resources */,
 				D53FA2EA1901B01900A5D0CC /* owl.png in Resources */,
