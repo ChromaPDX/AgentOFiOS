@@ -23,7 +23,6 @@
 		61E1E181187367DE006EF1AB /* ofxTCPManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 61E1E179187367DD006EF1AB /* ofxTCPManager.cpp */; };
 		61E1E182187367DE006EF1AB /* ofxTCPServer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 61E1E17B187367DD006EF1AB /* ofxTCPServer.cpp */; };
 		61E1E183187367DE006EF1AB /* ofxUDPManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 61E1E17D187367DD006EF1AB /* ofxUDPManager.cpp */; };
-		61E1E186187395D1006EF1AB /* ofxTimer.mm in Sources */ = {isa = PBXBuildFile; fileRef = 61E1E184187395D1006EF1AB /* ofxTimer.mm */; };
 		61ED8A1918AEE4C2002333A6 /* decrement.png in Resources */ = {isa = PBXBuildFile; fileRef = 61ED8A1718AEE4C2002333A6 /* decrement.png */; };
 		61ED8A1A18AEE4C2002333A6 /* increment.png in Resources */ = {isa = PBXBuildFile; fileRef = 61ED8A1818AEE4C2002333A6 /* increment.png */; };
 		62545D179C94265CA1389D4A /* OscOutboundPacketStream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 63A47AC60FFAFC3BF093EC0F /* OscOutboundPacketStream.cpp */; };
@@ -124,8 +123,6 @@
 		61E1E17C187367DD006EF1AB /* ofxTCPServer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ofxTCPServer.h; sourceTree = "<group>"; };
 		61E1E17D187367DD006EF1AB /* ofxUDPManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ofxUDPManager.cpp; sourceTree = "<group>"; };
 		61E1E17E187367DD006EF1AB /* ofxUDPManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ofxUDPManager.h; sourceTree = "<group>"; };
-		61E1E184187395D1006EF1AB /* ofxTimer.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ofxTimer.mm; sourceTree = "<group>"; };
-		61E1E185187395D1006EF1AB /* ofxTimer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ofxTimer.h; sourceTree = "<group>"; };
 		61ED8A1718AEE4C2002333A6 /* decrement.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = decrement.png; sourceTree = "<group>"; };
 		61ED8A1818AEE4C2002333A6 /* increment.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = increment.png; sourceTree = "<group>"; };
 		63A47AC60FFAFC3BF093EC0F /* OscOutboundPacketStream.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 30; name = OscOutboundPacketStream.cpp; path = ../../../addons/ofxOsc/libs/oscpack/src/osc/OscOutboundPacketStream.cpp; sourceTree = SOURCE_ROOT; };
@@ -452,8 +449,6 @@
 				6190B19D1872392600EF6869 /* agentController.mm */,
 				D5961C4218F882E300978303 /* AgentView.h */,
 				D5961C4118F882E300978303 /* AgentView.mm */,
-				61E1E184187395D1006EF1AB /* ofxTimer.mm */,
-				61E1E185187395D1006EF1AB /* ofxTimer.h */,
 				D53FA2F61905B4E000A5D0CC /* wifi.png */,
 				D53FA2F01905B27000A5D0CC /* circleBlack.png */,
 				D53FA2F11905B27000A5D0CC /* circleWhite.png */,
@@ -631,7 +626,6 @@
 				61E1E180187367DE006EF1AB /* ofxTCPClient.cpp in Sources */,
 				5864AD82E20F15536D054EA3 /* ofxOscMessage.cpp in Sources */,
 				4ADB88E2FB52E76A471065DE /* ofxOscParameterSync.cpp in Sources */,
-				61E1E186187395D1006EF1AB /* ofxTimer.mm in Sources */,
 				640279EE111671BD026CB013 /* ofxOscReceiver.cpp in Sources */,
 				61E1E182187367DE006EF1AB /* ofxTCPServer.cpp in Sources */,
 				8F5205AEF8861EF234F0651A /* ofxOscSender.cpp in Sources */,

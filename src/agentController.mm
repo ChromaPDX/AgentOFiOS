@@ -305,7 +305,7 @@ void agentController::serverInitiateRound(){
     // decide on a new gesture
     do {
         mainMessage = actionString[rand()%(NUM_GESTURES-1) + 1];
-    } while (actionHasOccurred(mainMessage));
+    } while (gestureHasOccurred(mainMessage));
     // store it in the first vacant spot in the previousActions array
     bool placed = false;
     for(int i = 0; i < NUM_TURNS; i++){
@@ -321,7 +321,7 @@ void agentController::serverInitiateRound(){
     ((testApp*) ofGetAppPtr())->vibrate(true);
 }
 
-bool agentController::actionHasOccurred(string message){
+bool agentController::gestureHasOccurred(string message){
     for(int i = 0; i < NUM_TURNS; i++){
         if(strcmp(previousActions[i].c_str(), message.c_str()) == 0)
             return true;

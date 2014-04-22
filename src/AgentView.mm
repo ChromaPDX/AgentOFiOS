@@ -70,10 +70,6 @@ void AgentView::setup(){
     complementaries[5*3+0] = 2;     complementaries[5*3+1] = 0;     complementaries[5*3+2] = 6;
     complementaries[6*3+0] = 0;     complementaries[6*3+1] = 5;     complementaries[6*3+2] = 2;
 
-    // might be getting rid of sphere
-    sphere.setRadius( ofGetWidth()  );
-    ofSetSphereResolution(24);
-    
     avatars[1].loadImage("ape.png");
     avatars[2].loadImage("bear.png");
     avatars[3].loadImage("eagle.png");
@@ -313,41 +309,42 @@ void AgentView::draw(ProgramState state, NetworkState networkState, long elapsed
         }
     }
     else if(state == StateCountdown){
+        string countdownString;
         if(elapsedMillis > stateBeginTime + 5000){
-            mainMessage = "";
+            countdownString = "";
         }
         else if(elapsedMillis > stateBeginTime + 4000){
-            mainMessage = "1";
+            countdownString = "1";
         }
         else if(elapsedMillis > stateBeginTime + 3000){
-            mainMessage = "2";
+            countdownString = "2";
         }
         else if(elapsedMillis > stateBeginTime + 2000){
-            mainMessage = "3";
+            countdownString = "3";
         }
         else if(elapsedMillis > stateBeginTime + 1000){
-            mainMessage = "4";
+            countdownString = "4";
         }
         else if(elapsedMillis > stateBeginTime){
-            mainMessage = "5";
+            countdownString = "5";
         }
-        fontLarge.drawString(mainMessage, centerX-fontLarge.stringWidth(mainMessage)*.5, centerY-fontLarge.stringHeight(mainMessage)*.5);
+        fontLarge.drawString(countdownString, centerX-fontLarge.stringWidth(countdownString)*.5, centerY-fontLarge.stringHeight(countdownString)*.5);
     }
     else if(state == StateTurnScramble){
-        fontLarge.drawString("SCRAMBLE", centerX-fontLarge.stringWidth("SCRAMBLE")*.5, centerY-fontLarge.stringHeight("SCRAMBLE")*.5);
+        font.drawString("SCRAMBLE", centerX-font.stringWidth("SCRAMBLE")*.5, centerY-font.stringHeight("SCRAMBLE")*.5);
     }
     else if(state == StateTurnGesture){
-        fontLarge.drawString("GESTURE", centerX-fontLarge.stringWidth("GESTURE")*.5, centerY-fontLarge.stringHeight("GESTURE")*.5);
-        fontLarge.drawString(mainMessage, centerX-fontLarge.stringWidth(mainMessage)*.5, centerY-fontLarge.stringHeight(mainMessage)*.75);
+        font.drawString("GESTURE", centerX-font.stringWidth("GESTURE")*.5, centerY-font.stringHeight("GESTURE")*.5);
+        font.drawString(controller->mainMessage, centerX-font.stringWidth(controller->mainMessage)*.5, centerY+font.stringHeight(controller->mainMessage)*.75);
     }
     else if(state == StateTurnComplete){
-        fontLarge.drawString("COMPLETE", centerX-fontLarge.stringWidth("COMPLETE")*.5, centerY-fontLarge.stringHeight("COMPLETE")*.5);
+        font.drawString("COMPLETE", centerX-font.stringWidth("COMPLETE")*.5, centerY-font.stringHeight("COMPLETE")*.5);
     }
     else if(state == StateDecide){
-        fontLarge.drawString("PICK", centerX-fontLarge.stringWidth("PICK")*.5, centerY-fontLarge.stringHeight("PICK")*.5);
+        font.drawString("PICK", centerX-font.stringWidth("PICK")*.5, centerY-font.stringHeight("PICK")*.5);
     }
     else if(state == StateGameOver){
-        fontLarge.drawString("GAME OVER", centerX-fontLarge.stringWidth("GAME OVER")*.5, centerY-fontLarge.stringHeight("GAME OVER")*.5);
+        font.drawString("GAME OVER", centerX-font.stringWidth("GAME OVER")*.5, centerY-font.stringHeight("GAME OVER")*.5);
     }
     
     // white bar at bottom
@@ -641,21 +638,4 @@ void AgentView::drawInGameBackground(){
     ofRotate(reticleInsideAngle*180/PI);
     reticleInside.draw(0, 0);
     ofPopMatrix();
-}
-
-void AgentView::drawAnimatedSphereBackground() {
-    
-    float spinX = sin(ofGetElapsedTimef()*.35f);
-    float spinY = cos(ofGetElapsedTimef()*.075f);
-    sphere.setPosition(ofGetWidth()*.5, ofGetHeight()*.5, 200.);
-    sphere.rotate(spinX, 1.0, 0.0, 0.0);
-    sphere.rotate(spinY, 0, 1.0, 0.0);
-    
-    ofEnableLighting();
-    ofNoFill();
-    ofSetColor(255);
-    ofSetLineWidth(.1);
-    sphere.drawWireframe();
-    ofFill();
-    ofDisableLighting();
 }
