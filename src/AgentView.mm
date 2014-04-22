@@ -47,6 +47,16 @@ void AgentView::setup(){
     circleShadow.loadImage("circleShadow.png");
     circleShadow.setAnchorPercent(.5, .5);
     
+    avatarCoords[0*2+0] = centerX;      avatarCoords[0*2+1] = height*.75;
+    avatarCoords[1*2+0] = centerX;      avatarCoords[1*2+1] = height*.5;
+    avatarCoords[2*2+0] = width*.25;    avatarCoords[2*2+1] = height*.66;
+    avatarCoords[3*2+0] = width*.75;    avatarCoords[3*2+1] = height*.66;
+    avatarCoords[4*2+0] = width*.25;    avatarCoords[4*2+1] = height*.33;
+    avatarCoords[5*2+0] = width*.75;    avatarCoords[5*2+1] = height*.33;
+    avatarCoords[6*2+0] = centerX;      avatarCoords[6*2+1] = height*.25;
+    avatarCoords[7*2+0] = width*.75;    avatarCoords[7*2+1] = height*.2;
+    avatarCoords[8*2+0] = width*.25;    avatarCoords[8*2+1] = height*.2;
+    
     spymess[0] = rand()%23+65;
     spymess[1] = rand()%23+65;
     spymess[2] = rand()%23+65;
@@ -254,6 +264,8 @@ void AgentView::draw(ProgramState state, NetworkState networkState, long elapsed
 //        string backString = "< BACK";
 //        fontMedium.drawString(backString,fontMedium.stringWidth(backString)*.35,ofGetHeight()*.1 - fontMedium.stringHeight(backString)/2.);
 
+        int count = 0;
+        
         if(isServer){
             ofSetColor(255, 255);
             circleShadow.draw(centerX, height*.75, 240, 240);
@@ -261,15 +273,17 @@ void AgentView::draw(ProgramState state, NetworkState networkState, long elapsed
             circleWhite.draw(centerX, height*.75, 200, 200);
             ofSetColor(255, 255);
             avatars[controller->avatarSelf].draw(centerX, height*.75, 150, 150);
+            count++;
         }
         for(int i = 0; i < 256; i++){
-            if(controller->avatarIcons[i] != 0){
+            if(controller->avatarIcons[i] != 0 &&  count < NUM_AVATAR_COORDS){  // todo make case for count > NUM_AVATAR_COORDS
                 ofSetColor(255, 255);
-                circleShadow.draw(centerX, height*.45 + height*.2*i, 240, 240);
+                circleShadow.draw(avatarCoords[count*2+0], avatarCoords[count*2+1], 240, 240);
                 ofSetColor(primaries[controller->avatarColors[i]-1]);
-                circleWhite.draw(centerX, height*.45+height*.2*i, 200, 200);
+                circleWhite.draw(avatarCoords[count*2+0], avatarCoords[count*2+1], 200, 200);
                 ofSetColor(255, 255);
-                avatars[controller->avatarIcons[i]].draw(centerX, height*.45+height*.2*i, 150, 150);
+                avatars[controller->avatarIcons[i]].draw(avatarCoords[count*2+0], avatarCoords[count*2+1], 150, 150);
+                count++;
             }
         }
 
@@ -296,9 +310,15 @@ void AgentView::draw(ProgramState state, NetworkState networkState, long elapsed
         
         fontMedium.drawString("LEAVE", fontMedium.stringWidth("LEAVE")*.1, height - fontMedium.stringHeight("LEAVE")*.5);
 
-        
+        if(transitionActive){
+            int alpha = 255*(1.0-transition);
+            ofSetColor(0, alpha);
+            ofRect(0, 0, width, height);
+        }
     }
     else if(state == StateStartGame){
+        ofClear(0, 255);
+        ofSetColor(255, 255);
         if(elapsedMillis > stateBeginTime + 1000){
             if(isSpy)   font.drawString("shhh", centerX-font.stringWidth("shhh")/2., centerY);
             else        font.drawString("AGENT", centerX-font.stringWidth("AGENT")/2., centerY);
@@ -309,6 +329,28 @@ void AgentView::draw(ProgramState state, NetworkState networkState, long elapsed
         }
     }
     else if(state == StateCountdown){
+
+        if(elapsedMillis < stateBeginTime + 2000){
+            float fade = (elapsedMillis-stateBeginTime-1000)/1000.0;
+            if(fade < 0) fade = 0;
+            ofSetColor(0, 255-fade*255);
+            ofRect(0, 0, width, height);
+        }
+        
+        if(elapsedMillis < stateBeginTime + 500){
+            float speed = 7; // speed to progress through animation curve
+            float time = (elapsedMillis-stateBeginTime)/500.0 * speed;
+            float curve = cosf(time-M_PI)/(9*powf(2, time-M_PI)) + 1;
+            float diameter = width*.75 * curve;
+            ofSetColor(255, 255);
+            circleShadow.draw(centerX, centerY, diameter, diameter);
+            ofSetColor(primaries[primaryColor]);
+            circleWhite.draw(centerX, centerY, diameter*.83, diameter*.83);
+            ofSetColor(255, 255);
+            avatars[controller->avatarSelf].draw(centerX, centerY, diameter*.625, diameter*.625);
+            
+        }
+        ofSetColor(255, 255);
         string countdownString;
         if(elapsedMillis > stateBeginTime + 5000){
             countdownString = "";
@@ -323,28 +365,38 @@ void AgentView::draw(ProgramState state, NetworkState networkState, long elapsed
             countdownString = "3";
         }
         else if(elapsedMillis > stateBeginTime + 1000){
-            countdownString = "4";
+            countdownString = "";
         }
         else if(elapsedMillis > stateBeginTime){
-            countdownString = "5";
+            countdownString = "";
         }
-        fontLarge.drawString(countdownString, centerX-fontLarge.stringWidth(countdownString)*.5, centerY-fontLarge.stringHeight(countdownString)*.5);
+        fontLarge.drawString(countdownString, centerX-fontLarge.stringWidth(countdownString)*.5, fontLarge.stringHeight(countdownString)*2.5);
     }
     else if(state == StateTurnScramble){
-        font.drawString("SCRAMBLE", centerX-font.stringWidth("SCRAMBLE")*.5, centerY-font.stringHeight("SCRAMBLE")*.5);
+        font.drawString("SCRAMBLE", centerX-font.stringWidth("SCRAMBLE")*.5, height*.83-font.stringHeight("SCRAMBLE")*.5);
     }
     else if(state == StateTurnGesture){
-        font.drawString("GESTURE", centerX-font.stringWidth("GESTURE")*.5, centerY-font.stringHeight("GESTURE")*.5);
-        font.drawString(controller->mainMessage, centerX-font.stringWidth(controller->mainMessage)*.5, centerY+font.stringHeight(controller->mainMessage)*.75);
+        font.drawString("GESTURE", centerX-font.stringWidth("GESTURE")*.5, height*.83-font.stringHeight("GESTURE")*.5);
+        font.drawString(controller->mainMessage, centerX-font.stringWidth(controller->mainMessage)*.5, height*.83+font.stringHeight(controller->mainMessage)*.75);
     }
     else if(state == StateTurnComplete){
-        font.drawString("COMPLETE", centerX-font.stringWidth("COMPLETE")*.5, centerY-font.stringHeight("COMPLETE")*.5);
+        font.drawString("COMPLETE", centerX-font.stringWidth("COMPLETE")*.5, height*.83-font.stringHeight("COMPLETE")*.5);
     }
     else if(state == StateDecide){
-        font.drawString("PICK", centerX-font.stringWidth("PICK")*.5, centerY-font.stringHeight("PICK")*.5);
+        font.drawString("PICK", centerX-font.stringWidth("PICK")*.5, height*.83-font.stringHeight("PICK")*.5);
     }
     else if(state == StateGameOver){
-        font.drawString("GAME OVER", centerX-font.stringWidth("GAME OVER")*.5, centerY-font.stringHeight("GAME OVER")*.5);
+        font.drawString("GAME OVER", centerX-font.stringWidth("GAME OVER")*.5, height*.83-font.stringHeight("GAME OVER")*.5);
+    }
+
+    if(state == StateTurnScramble || state == StateTurnGesture || state == StateTurnComplete || (state == StateCountdown && elapsedMillis > stateBeginTime + 500) ){
+        float diameter = width*.75;
+        ofSetColor(255, 255);
+        circleShadow.draw(centerX, centerY, diameter, diameter);
+        ofSetColor(primaries[primaryColor]);
+        circleWhite.draw(centerX, centerY, diameter*.83, diameter*.83);
+        ofSetColor(255, 255);
+        avatars[controller->avatarSelf].draw(centerX, centerY, diameter*.625, diameter*.625);
     }
     
     // white bar at bottom

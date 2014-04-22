@@ -14,6 +14,8 @@
 
 #include "AgentCommon.h"
 
+#define NUM_AVATAR_COORDS 9
+
 class agentController;
 
 class AgentView{
@@ -47,6 +49,7 @@ private:
 
     void    drawInGameBackground();  // reticle
 
+    float   avatarCoords[NUM_AVATAR_COORDS*2]; // first 9 avatar positions in the ready room. the rest are randomly placed
     
     char    spymess[5];  // scrambled text
 

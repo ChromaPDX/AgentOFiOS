@@ -11,6 +11,8 @@
 #import "testApp.h"
 //#import "ofxTimer.h"
 
+#define TRANSITION_BEGIN_GAME 1500  // fade out to reveal spy roles and start game
+
 string paddedString(int num){
     if (num >= 100)     return ofToString(num);
     else if (num >= 10) return "0" + ofToString(num);
@@ -134,7 +136,7 @@ void agentController::updateTCP() {
 	    	ofLogNotice("TCP") << "Received From Server: " + Rx;
             strcpy( receivedText, Rx.c_str() );
             if (strcmp(receivedText, "stateStartGame") == 0) {
-                updateState(StateStartGame);
+                updateStateWithTransition(StateStartGame, TRANSITION_BEGIN_GAME);
             }
             else if (strcmp(receivedText, "execute") == 0) {
                 execute(mainMessage);
@@ -444,8 +446,7 @@ void agentController::updateState(ProgramState newState){
     else if(state == StateJoinScreen);
     else if(state == StateReadyRoom);
     else if(state == StateStartGame){       // initiated by server sendMessage("stateStartGame")
-        if(isServer)
-            generateNewSpyRoles();
+            
     }
     else if(state == StateCountdown);
     else if(state == StateTurnScramble);   // server initiated by sendMessage(gesture)
@@ -555,7 +556,6 @@ void agentController::update() {
     ////////////////////////////////////////////////////////////
         
     if (isClient || isServer) {
-        
         updateTCP();
     }
 }
@@ -683,8 +683,9 @@ void agentController::touchBegan(int x, int y, int id){
             else if (isServer){
 #warning change connectedAgents > 2
                 if(connectedAgents > 1){
+                    generateNewSpyRoles();
                     sendMessage("stateStartGame");
-                    updateState(StateStartGame);
+                    updateStateWithTransition(StateStartGame, TRANSITION_BEGIN_GAME);
                 }
                 else{
                     // deliver message: "game requires at least 3 players"
