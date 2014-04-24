@@ -56,6 +56,8 @@
 		D53FA2F31905B27000A5D0CC /* circleWhite.png in Resources */ = {isa = PBXBuildFile; fileRef = D53FA2F11905B27000A5D0CC /* circleWhite.png */; };
 		D53FA2F51905B44D00A5D0CC /* circleShadow.png in Resources */ = {isa = PBXBuildFile; fileRef = D53FA2F41905B44D00A5D0CC /* circleShadow.png */; };
 		D53FA2F71905B4E000A5D0CC /* wifi.png in Resources */ = {isa = PBXBuildFile; fileRef = D53FA2F61905B4E000A5D0CC /* wifi.png */; };
+		D53FA2FE1908675E00A5D0CC /* clickDown.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = D53FA2FC1908675E00A5D0CC /* clickDown.mp3 */; };
+		D53FA2FF1908675E00A5D0CC /* clickUp.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = D53FA2FD1908675E00A5D0CC /* clickUp.mp3 */; };
 		D577837A188F12B80038156E /* inside_circle.png in Resources */ = {isa = PBXBuildFile; fileRef = D5778379188F12B80038156E /* inside_circle.png */; };
 		D577837C188F206F0038156E /* reticle_inside.png in Resources */ = {isa = PBXBuildFile; fileRef = D577837B188F206F0038156E /* reticle_inside.png */; };
 		D5961C4318F882E300978303 /* AgentView.mm in Sources */ = {isa = PBXBuildFile; fileRef = D5961C4118F882E300978303 /* AgentView.mm */; };
@@ -166,6 +168,8 @@
 		D53FA2F11905B27000A5D0CC /* circleWhite.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = circleWhite.png; sourceTree = "<group>"; };
 		D53FA2F41905B44D00A5D0CC /* circleShadow.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = circleShadow.png; sourceTree = "<group>"; };
 		D53FA2F61905B4E000A5D0CC /* wifi.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = wifi.png; sourceTree = "<group>"; };
+		D53FA2FC1908675E00A5D0CC /* clickDown.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = clickDown.mp3; sourceTree = "<group>"; };
+		D53FA2FD1908675E00A5D0CC /* clickUp.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = clickUp.mp3; sourceTree = "<group>"; };
 		D5778379188F12B80038156E /* inside_circle.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = inside_circle.png; sourceTree = "<group>"; };
 		D577837B188F206F0038156E /* reticle_inside.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = reticle_inside.png; sourceTree = "<group>"; };
 		D5961C4118F882E300978303 /* AgentView.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = AgentView.mm; sourceTree = "<group>"; };
@@ -461,6 +465,8 @@
 				D51BE0B3188DE0C900359972 /* fingerprint.png */,
 				61ED8A1718AEE4C2002333A6 /* decrement.png */,
 				61ED8A1818AEE4C2002333A6 /* increment.png */,
+				D53FA2FC1908675E00A5D0CC /* clickDown.mp3 */,
+				D53FA2FD1908675E00A5D0CC /* clickUp.mp3 */,
 				D53FA2EC1901B01F00A5D0CC /* avatars */,
 			);
 			path = src;
@@ -573,6 +579,7 @@
 				D53FA2F21905B27000A5D0CC /* circleBlack.png in Resources */,
 				D53FA2E61901B01900A5D0CC /* eagle.png in Resources */,
 				D51BE0B8188DF21B00359972 /* reticle_compass.png in Resources */,
+				D53FA2FF1908675E00A5D0CC /* clickUp.mp3 in Resources */,
 				D53FA2F51905B44D00A5D0CC /* circleShadow.png in Resources */,
 				61ED8A1A18AEE4C2002333A6 /* increment.png in Resources */,
 				61E1E17F187367DE006EF1AB /* Instructions.txt in Resources */,
@@ -587,6 +594,7 @@
 				D577837C188F206F0038156E /* reticle_inside.png in Resources */,
 				D53FA2E41901B01900A5D0CC /* ape.png in Resources */,
 				D51BE0B7188DF21B00359972 /* reticle_outline.png in Resources */,
+				D53FA2FE1908675E00A5D0CC /* clickDown.mp3 in Resources */,
 				D53FA2E91901B01900A5D0CC /* moth.png in Resources */,
 				D51BE0B4188DE0C900359972 /* fingerprint.png in Resources */,
 				D53FA2E71901B01900A5D0CC /* horse.png in Resources */,

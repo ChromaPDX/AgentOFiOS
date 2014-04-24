@@ -32,6 +32,10 @@ void agentController::setup() {
     centerX = ofGetWidth()/2.;
     centerY = ofGetHeight()/2.;
     
+    // SOUNDS
+    clickDown.loadSound("clickDown.mp3");
+    clickUp.loadSound("clickUp.mp3");
+    
     agentView.setup();
     agentView.controller = this;
 }
@@ -260,14 +264,18 @@ string agentController::makeServerIPString(){
 }
 
 void agentController::stopServer(){
-	if (isServer){
+//	if (server.isConnected()){
         for(int i = 0; i < server.getLastID(); i++){ // getLastID is UID of all clients
             if( server.isClientConnected(i) )
                 server.disconnectClient(i);
         }
+        // clear server game data
+        for(int i = 0; i < 256; i++)
+            avatarIcons[i] = 0;
         server.close();
         isServer = false;
-	}
+        agentView.setIsServer(isServer);
+//	}
 }
 
 void agentController::sendMessage(string message){
@@ -440,20 +448,20 @@ void agentController::updateState(ProgramState newState){
     
     if(state == StateWelcomeScreen);
     else if(state == StateConnectionScreen){
-        if (isServer){ stopServer(); isServer = false; }
+        if (isServer){ stopServer(); }
         if (isClient){ client.close(); isClient = false; }
+        networkState = NetworkNone;
+        printf("STATE connectionScreen\n");
     }
-    else if(state == StateJoinScreen);
-    else if(state == StateReadyRoom);
-    else if(state == StateStartGame){       // initiated by server sendMessage("stateStartGame")
-            
-    }
-    else if(state == StateCountdown);
-    else if(state == StateTurnScramble);   // server initiated by sendMessage(gesture)
-    else if(state == StateTurnGesture);  // server initiated at the end of execute()
-    else if(state == StateTurnComplete);    // server initiated by sendMessage("stateTurnComplete")
-    else if(state == StateDecide);          // initiated by server sendMessage("stateDecide")
-    else if(state == StateGameOver);        // initiated by server sendMessage "WIN" / "LOSE"
+    else if(state == StateJoinScreen) printf("STATE joinScreen\n");
+    else if(state == StateReadyRoom) printf("STATE readyRoom\n");
+    else if(state == StateStartGame) printf("STATE startGame\n");       // initiated by server sendMessage("stateStartGame")
+    else if(state == StateCountdown) printf("STATE countDown\n");
+    else if(state == StateTurnScramble) printf("STATE TURN scramble\n");   // server initiated by sendMessage(gesture)
+    else if(state == StateTurnGesture) printf("STATE TURN gesture\n");  // server initiated at the end of execute()
+    else if(state == StateTurnComplete) printf("STATE TURN complete\n");    // server initiated by sendMessage("stateTurnComplete")
+    else if(state == StateDecide) printf("STATE decide\n");          // initiated by server sendMessage("stateDecide")
+    else if(state == StateGameOver) printf("STATE gameOver\n");        // initiated by server sendMessage "WIN" / "LOSE"
 }
 
 // call updateState() after a delay
@@ -605,52 +613,31 @@ void agentController::update() {
 //--------------------------------------------------------------
 void agentController::touchBegan(int x, int y, int id){
     
-    if(state == StateWelcomeScreen);
-    else if(state == StateConnectionScreen);
+    // this is all copy pasted from touchEnd(), where the code is more functional
+    // this code is just for sound
+    
+    if(state == StateWelcomeScreen){
+        clickDown.play();
+    }
+    else if(state == StateConnectionScreen){
+        if(y > height * .5 && y < height * .7)
+            clickDown.play();
+    }
     else if(state == StateJoinScreen){
-        if(y > centerY){
-            serverIP = makeServerIPString();
-            isClient = clientConnect(serverIP);
-            if(isClient){
-                char identity[3];
-                identity[0] = '$';
-                identity[1] = avatarSelf;
-                identity[2] = agentView.primaryColor+1;
-                sendMessage(identity);
-                mainMessage = "";  // "Agent"
-                updateState(StateReadyRoom);                                                                          // gameState  :  connected
-            }
-            else {
-                // deliver error message
-            }
-        }
-        else if (x < width * .4) {
-            if (y < height * .5) { // inc 100's
-                loginCode >= 200 ? loginCode -= 200 : loginCode += 100;
-            }
-            else {
-                loginCode < 100 ? loginCode += 200 : loginCode -= 100;
-            }
-        }
-        else if (x > width *.4 && x < width * .6){
-            int tens = loginCode - ((loginCode / 100) * 100);
-            if (y < height * .5) { // inc 100's
-                tens >= 90 ? loginCode -= 90 : loginCode += 10;
-            }
-            else {
-                tens < 10 ? loginCode += 90 : loginCode -= 10;
-            }
-        }
-        else if (x > width * .6){
-            int tens = loginCode - ((loginCode / 100) * 100);
-            int ones = tens - ((tens / 10) * 10);
-            if (y < height * .5) { // inc 100's
-                ones >= 9 ? loginCode -= 9 : loginCode += 1;
-            }
-            else {
-                ones < 1 ? loginCode += 9 : loginCode -= 1;
-            }
-        }
+        // top row, increment
+        if(y > height * .1 && y < height * .3)
+            if(( x > width * .15 && x < width * .35) || (x > width * .4 && x < width * .6) || (x > width * .65 && x < width * .85) )
+                clickDown.play();
+        // bottom row, decrement
+        if(y > height * .35 && y < height * .55)
+            if( (x > width * .15 && x < width * .35) || (x > width * .4 && x < width * .6) || (x > width * .65 && x < width * .85) )
+                clickDown.play();
+        // back button
+        if(x < centerX && y > height * .9)
+            clickDown.play();
+        // join button
+        if(y > height * .6 && y < height * .72)
+            clickDown.play();
     }
     else if(state == StateReadyRoom);
     else if(state == StateStartGame);       // initiated by server sendMessage("stateStartGame")
@@ -672,26 +659,6 @@ void agentController::touchBegan(int x, int y, int id){
 //        NetworkServerDisconnected   //
 
     switch (state) {
-            
-        case StateReadyRoom:
-            
-            // back button
-            if (y < height * .2) {
-                updateState(StateConnectionScreen);
-            }
-            // start game
-            else if (isServer){
-#warning change connectedAgents > 2
-                if(connectedAgents > 1){
-                    generateNewSpyRoles();
-                    sendMessage("stateStartGame");
-                    updateStateWithTransition(StateStartGame, TRANSITION_BEGIN_GAME);
-                }
-                else{
-                    // deliver message: "game requires at least 3 players"
-                }
-            }
-            break;
             
         case StateTurnGesture:
             if (recordMode == RecordModeTouch) {
@@ -723,32 +690,97 @@ void agentController::touchBegan(int x, int y, int id){
 void agentController::touchMoved(int x, int y, int id) { }
 
 void agentController::touchEnded(int x, int y, int id) {
-    
+//    clickUp.play();
     if(state == StateWelcomeScreen){
         avatarSelf = ofRandom(1, 9);
         printf("AVATAR CHOSE: %d\n",avatarSelf);
         updateState(StateConnectionScreen);
     }
     else if(state == StateConnectionScreen){
-        if(x < centerX){
-            isServer = serverConnect();
-            agentView.setIsServer(isServer);
-            if(isServer){
-                ofLogNotice("choose server") << "yes!";
-                networkState = NetworkHostSuccess;
-                updateStateWithTransition(StateReadyRoom, 500);
-            }
-            else {
-                networkState = NetworkNone;
+        if(y > height * .5 && y < height * .7){
+            if(x < centerX){
+                isServer = serverConnect();
+                agentView.setIsServer(isServer);
+                if(isServer){
+                    ofLogNotice("choose server") << "yes!";
+                    networkState = NetworkHostSuccess;
+                    for(int i = 0; i < 256; i++)
+                        avatarIcons[i] = 0;
+//                    short   avatarNum;  // osmething wtiht this?
+
+                    updateStateWithTransition(StateReadyRoom, 500);
+                }
+                else {
+                    networkState = NetworkNone;
 //                loginState = LoginStateFailed;
+                }
             }
         }
         if(x > centerX){
             updateStateWithTransition(StateJoinScreen, 500);
         }
     }
-    else if(state == StateJoinScreen);
-    else if(state == StateReadyRoom);
+    else if(state == StateJoinScreen)
+    {
+        int tens = loginCode - ((loginCode / 100) * 100);
+        int ones = tens - ((tens / 10) * 10);
+        // top row, increment
+        if(y > height * .1 && y < height * .3){
+            if(x > width * .15 && x < width * .35)
+                loginCode >= 200 ? loginCode -= 200 : loginCode += 100;
+            if(x > width * .4 && x < width * .6)
+                tens >= 90 ? loginCode -= 90 : loginCode += 10;
+            if(x > width * .65 && x < width * .85)
+                ones >= 9 ? loginCode -= 9 : loginCode += 1;
+        }
+        // bottom row, decrement
+        if(y > height * .35 && y < height * .55){
+            if(x > width * .15 && x < width * .35)
+                loginCode < 100 ? loginCode += 200 : loginCode -= 100;
+            if(x > width * .4 && x < width * .6)
+                tens < 10 ? loginCode += 90 : loginCode -= 10;
+            if(x > width * .65 && x < width * .85)
+                ones < 1 ? loginCode += 9 : loginCode -= 1;
+        }
+        // back button
+        if(x < centerX && y > height * .9){
+            updateState(StateConnectionScreen);
+        }
+        // join button
+        if(y > height * .6 && y < height * .72){
+            serverIP = makeServerIPString();
+            isClient = clientConnect(serverIP);
+            if(isClient){
+                char identity[3];
+                identity[0] = '$';
+                identity[1] = avatarSelf;
+                identity[2] = agentView.primaryColor+1;
+                sendMessage(identity);
+                mainMessage = "";  // "Agent"
+                updateState(StateReadyRoom);                                                                          // gameState  :  connected
+            }
+            else {
+                // deliver error message
+            }
+        }
+    }
+    else if(state == StateReadyRoom){
+        if(x < centerX && y > height * .9){
+            updateState(StateConnectionScreen);
+        }
+        // start game
+        if (isServer && x > centerX && y > height * .9){
+#warning change connectedAgents > 2
+            if(connectedAgents > 1){
+                generateNewSpyRoles();
+                sendMessage("stateStartGame");
+                updateStateWithTransition(StateStartGame, TRANSITION_BEGIN_GAME);
+            }
+            else{
+                // deliver message: "game requires at least 3 players"
+            }
+        }
+    }
     else if(state == StateStartGame);       // initiated by server sendMessage("stateStartGame")
     else if(state == StateCountdown);
     else if(state == StateTurnScramble);

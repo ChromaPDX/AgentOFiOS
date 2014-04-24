@@ -61,6 +61,8 @@ private:
     AgentView agentView;
 
 // DOUBLE AGENT GAME
+    // cover your eyes
+    // make your animal's sound
     string      actionString[NUM_GESTURES] = {  "NOTHING",
                                                 "JUMP",
                                                 "TOUCH SCREEN",
@@ -88,6 +90,9 @@ private:
     void        generateNewSpyRoles();   // called during "startGame"
     void        countScores();
     void        pickedAgent(int agent);
+    
+// SOUNDS
+    ofSoundPlayer   clickUp, clickDown;
     
 // SCRIPTING
     long            elapsedMillis;  // reduce calls to ofGetElapsedMillis()

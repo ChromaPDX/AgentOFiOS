@@ -52,6 +52,7 @@ private:
     float   avatarCoords[NUM_AVATAR_COORDS*2]; // first 9 avatar positions in the ready room. the rest are randomly placed
     
     char    spymess[5];  // scrambled text
+    string  scrambleStrings[7] = {"", ".", "..", "...", "....", ".....", "......"};
 
     ofTrueTypeFont  font;
     ofTrueTypeFont  fontTiny;

@@ -129,6 +129,7 @@ void AgentView::draw(ProgramState state, NetworkState networkState, long elapsed
     
     ofClear(primaries[primaryColor]);
     
+    // from 1 to 0
     if(transitionActive)
         transition = (transitionEndTime-elapsedMillis)/(float)transitionDuration;
     else
@@ -157,7 +158,6 @@ void AgentView::draw(ProgramState state, NetworkState networkState, long elapsed
         if(WIFIExist) wifistr = "WIFI connected :)";
         else wifistr = "I need WIFI :(";
         fontSmall.drawString(wifistr, 110, height - 50 + fontSmall.stringHeight(wifistr)*.5);
-
     }
     else if(state == StateConnectionScreen){
         int alpha = 255;
@@ -176,15 +176,24 @@ void AgentView::draw(ProgramState state, NetworkState networkState, long elapsed
 
         avatars[controller->avatarSelf].draw(centerX, height*.75, 100, 100);
 
+        float yPos = height-50;
+        if(transitionActive){
+            float speed = 7; // speed to progress through animation curve
+            float time = (transition) * speed;
+            float curve = cosf(time-M_PI)/(9*powf(2, time-M_PI)) + 1;
+            yPos += (1-curve)*150;
+        }
         
-        if(networkState == NetworkNone){
+//        if(networkState == NetworkNone){
             font.drawString("HOST", width*.25 - font.stringWidth("HOST")/2., height*.6 - font.stringHeight("HOST")/2.);
             font.drawString("JOIN", width*.75 - font.stringWidth("JOIN")/2., height*.6 - font.stringHeight("JOIN")/2.);
             ofSetColor(255, 255);
-            ofDrawPlane(width*.5, height-50, width, 100);
-            ofSetColor(0,alpha);
-            fontTiny.drawString("ONLY ONE HOST IS NEEDED", width*.5 - fontTiny.stringWidth("ONLY ONE HOST IS NEEDED")/2., height - fontTiny.stringHeight("ONLY ONE HOST IS NEEDED"));
-        }
+            ofDrawPlane(width*.5, yPos, width, 100);
+            ofSetColor(0,255);
+            fontTiny.drawString("ONLY ONE HOST IS NEEDED", width*.5 - fontTiny.stringWidth("ONLY ONE HOST IS NEEDED")/2., yPos + fontTiny.stringHeight("ONLY ONE HOST IS NEEDED")*.5);
+//        }
+        
+        
 //    case LoginStateServer:
 //        hostString = "JOIN CODE";
 //        clientString = controller->getCodeFromIp();
@@ -196,25 +205,35 @@ void AgentView::draw(ProgramState state, NetworkState networkState, long elapsed
     }
     else if(state == StateJoinScreen){
         
-        avatars[controller->avatarSelf].draw(centerX, height*.75, 100, 100);
-
+//        avatars[controller->avatarSelf].draw(centerX, height*.9, 100, 100);
         
 //        if(networkState == NetworkJoinAttempt){
+
+        string clientString = controller->getCodeFromInt(controller->loginCode);
+        
         ofSetColor(255, 255);
-            string hostString = "CODE";
-            string clientString = controller->getCodeFromInt(controller->loginCode);
-            string backString = "< BACK";
-            fontMedium.drawString(backString,fontMedium.stringWidth(backString)*.35,ofGetHeight()*.1 - fontMedium.stringHeight(backString)/2.);
-            font.drawString(hostString,ofGetWidth()/2 - font.stringWidth(hostString)/2.,ofGetHeight()*.2 - font.stringHeight(hostString)/2.);
-            font.drawString(clientString,ofGetWidth()/2 - font.stringWidth(clientString)/2.,ofGetHeight()*.475 - font.stringHeight(clientString)/2.);
-            increment.draw(width*.31, height*.325, width*.1, width*.1);
-            increment.draw(width*.5, height*.325, width*.1, width*.1);
-            increment.draw(width*.7, height*.325, width*.1, width*.1);
-            decrement.draw(width*.31, height*.525, width*.1, width*.1);
-            decrement.draw(width*.5, height*.525, width*.1, width*.1);
-            decrement.draw(width*.7, height*.525, width*.1, width*.1);
-            hostString = "JOIN";
-            font.drawString(hostString,ofGetWidth()/2 - font.stringWidth(hostString)/2.,ofGetHeight()*.75 - font.stringHeight(hostString)/2.);
+        fontLarge.drawString("JOIN",  centerX - fontLarge.stringWidth("JOIN")*.5, height*.66 + fontLarge.stringHeight("JOIN")*.5);
+        fontTiny.drawString("JOIN CODE", width*.5 - fontTiny.stringWidth("JOIN CODE")*.5, fontTiny.stringHeight("JOIN CODE")*2.5);
+        fontMedium.drawString("QUIT", fontMedium.stringWidth("QUIT")*.1, height - fontMedium.stringHeight("QUIT")*.5);
+        fontLarge.drawString(clientString,width/2. - fontLarge.stringWidth(clientString)/2.,height*.425 - fontLarge.stringHeight(clientString)/2.);
+        increment.draw(width*.25, height*.2, width*.2, width*.2);
+        increment.draw(width*.5, height*.2, width*.2, width*.2);
+        increment.draw(width*.75, height*.2, width*.2, width*.2);
+        decrement.draw(width*.25, height*.45, width*.2, width*.2);
+        decrement.draw(width*.5, height*.45, width*.2, width*.2);
+        decrement.draw(width*.75, height*.45, width*.2, width*.2);
+        
+        // X VALUES:
+        // middle left: width * .375
+        // middle right: width * .625
+        
+        // Y VALUES:
+        // middle of text: height * .325
+        // top row upper bounds:  height * .1
+        // top row lower bounds:  height * .3
+        // bottom row upper bounds: height * .35
+        // bottom row lower bounds: height * .55
+        
 //        }
         
 //    case LoginStateConnecting:
@@ -337,19 +356,21 @@ void AgentView::draw(ProgramState state, NetworkState networkState, long elapsed
             ofRect(0, 0, width, height);
         }
         
+        float diameter = width*.75;
         if(elapsedMillis < stateBeginTime + 500){
             float speed = 7; // speed to progress through animation curve
             float time = (elapsedMillis-stateBeginTime)/500.0 * speed;
             float curve = cosf(time-M_PI)/(9*powf(2, time-M_PI)) + 1;
-            float diameter = width*.75 * curve;
-            ofSetColor(255, 255);
-            circleShadow.draw(centerX, centerY, diameter, diameter);
-            ofSetColor(primaries[primaryColor]);
-            circleWhite.draw(centerX, centerY, diameter*.83, diameter*.83);
-            ofSetColor(255, 255);
-            avatars[controller->avatarSelf].draw(centerX, centerY, diameter*.625, diameter*.625);
-            
+            diameter *= curve;
         }
+
+        ofSetColor(255, 255);
+        circleShadow.draw(centerX, centerY, diameter, diameter);
+        ofSetColor(primaries[primaryColor]);
+        circleWhite.draw(centerX, centerY, diameter*.83, diameter*.83);
+        ofSetColor(255, 255);
+        avatars[controller->avatarSelf].draw(centerX, centerY, diameter*.625, diameter*.625);
+
         ofSetColor(255, 255);
         string countdownString;
         if(elapsedMillis > stateBeginTime + 5000){
@@ -373,23 +394,37 @@ void AgentView::draw(ProgramState state, NetworkState networkState, long elapsed
         fontLarge.drawString(countdownString, centerX-fontLarge.stringWidth(countdownString)*.5, fontLarge.stringHeight(countdownString)*2.5);
     }
     else if(state == StateTurnScramble){
-        font.drawString("SCRAMBLE", centerX-font.stringWidth("SCRAMBLE")*.5, height*.83-font.stringHeight("SCRAMBLE")*.5);
+        static int count = 0;
+        count++;
+        if(count >= 7) count = 0;
+        font.drawString(scrambleStrings[count], centerX-font.stringWidth(scrambleStrings[count])*.5, height*.83-font.stringHeight(scrambleStrings[count])*.5);
     }
     else if(state == StateTurnGesture){
-        font.drawString("GESTURE", centerX-font.stringWidth("GESTURE")*.5, height*.83-font.stringHeight("GESTURE")*.5);
+//        font.drawString("GESTURE", centerX-font.stringWidth("GESTURE")*.5, height*.83-font.stringHeight("GESTURE")*.5);
         font.drawString(controller->mainMessage, centerX-font.stringWidth(controller->mainMessage)*.5, height*.83+font.stringHeight(controller->mainMessage)*.75);
     }
     else if(state == StateTurnComplete){
         font.drawString("COMPLETE", centerX-font.stringWidth("COMPLETE")*.5, height*.83-font.stringHeight("COMPLETE")*.5);
     }
     else if(state == StateDecide){
-        font.drawString("PICK", centerX-font.stringWidth("PICK")*.5, height*.83-font.stringHeight("PICK")*.5);
+        float yPos = height-50;
+        if(elapsedMillis < stateBeginTime + 500){
+            float speed = 7; // speed to progress through animation curve
+            float time = (elapsedMillis-stateBeginTime)/500.0 * speed;
+            float curve = cosf(time-M_PI)/(9*powf(2, time-M_PI)) + 1;
+            yPos += (1-curve)*150;
+        }
+        ofSetColor(255, 255);
+        font.drawString("WHO IS IT?", centerX-font.stringWidth("WHO IS IT?")*.5, height*.2-font.stringHeight("WHO IS IT?")*.5);
+        ofDrawPlane(width*.5, yPos, width, 100);
+        ofSetColor(0, 255);
+        fontSmall.drawString("turn screen towards crowd", centerX - fontSmall.stringWidth("turn screen towards crowd")*.5, yPos + fontSmall.stringHeight("turn screen towards crowd")*.5);
     }
     else if(state == StateGameOver){
         font.drawString("GAME OVER", centerX-font.stringWidth("GAME OVER")*.5, height*.83-font.stringHeight("GAME OVER")*.5);
     }
 
-    if(state == StateTurnScramble || state == StateTurnGesture || state == StateTurnComplete || (state == StateCountdown && elapsedMillis > stateBeginTime + 500) ){
+    if(state == StateTurnScramble || state == StateTurnGesture || state == StateTurnComplete || state == StateDecide){
         float diameter = width*.75;
         ofSetColor(255, 255);
         circleShadow.draw(centerX, centerY, diameter, diameter);
