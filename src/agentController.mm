@@ -383,7 +383,7 @@ void agentController::execute(string gesture){
     updateState(StateTurnGesture);
 }
 
-// server only function, i think
+// server only function
 void agentController::pickedAgent(int agent) {
     
     if(agent == spyAccordingToServer){
@@ -394,6 +394,7 @@ void agentController::pickedAgent(int agent) {
         mainMessage = "LOSE";
         sendMessage(mainMessage);
     }
+    updateState(StateGameOver);
 }
 
 
@@ -546,9 +547,11 @@ void agentController::update() {
         }
     }
     else if(state == StateDecide);          // initiated by server sendMessage("stateDecide")
-    else if(state == StateGameOver);        // initiated by server sendMessage "WIN" / "LOSE"
-
-    
+    else if(state == StateGameOver){        // initiated by server sendMessage "WIN" / "LOSE"
+        if(elapsedMillis > stateBeginTime + 5000){
+            updateState(StateReadyRoom);
+        }
+    }
     ////////////////////////////////////////////////////////////
     // once / second updates
     if(oneSecond != ofGetSeconds()){   // only runs once/second
