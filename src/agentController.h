@@ -22,7 +22,7 @@ public:
     void    setIpAddress(const char *ipAddress);
     
 // SENSORS
-    void    updateAccel(ofVec3f newAccel);
+//    void    updateAccel(ofVec3f newAccel);
     void    updateOrientation(ofMatrix3x3 newOrientationMatrix, ofMatrix3x3 newDeltaOrientationMatrix);
 //    bool gestureCompleted;
     
@@ -42,7 +42,7 @@ public:
     string  getCodeFromInt(int num);
     int     loginCode = 0;
     bool    preGameCountdownSequence;
-    float   recordedSensorData[SENSOR_DATA_ARRAY_SIZE * 3];
+    float   recordedSensorData[NUM_TURNS][SENSOR_DATA_ARRAY_SIZE];
     string  mainMessage;   // the action command, used for display and orientation within the game loop
     bool    animatedScrambleFont;    // turns to false on everybody's phone the moment the execute function happens
     int     connectedAgents;  // client stores from server server.getNumClients()
@@ -56,6 +56,17 @@ public:
     ofMatrix3x3 orientation; // device orientation
     unsigned long long turnTime;  // beginning of each turn. for calculating reaction time
     
+    short   spyAvatar;
+    short   spyColor;
+    
+    
+    int         turnNumber;   // initialized to 0 at GameStateStartGame or GameStateBeginCountdown
+                              // but immediately at StateTurnScramble, it goes to 1.
+                              // increments every StateTurnScramble
+                              // so really, turnNumber counts up from 1, turn 1 is 1, turn 3 is 3.
+
+    bool        isSpy;    // set when client receives "spy" or "notspy"
+
 private:
     
     AgentView agentView;
@@ -76,10 +87,8 @@ private:
                                                 "RAISE\nA HAND",
                                                 "RUN IN PLACE"};
     RecordMode  recordMode;  // gesture type, what kind of motion data to capture   // is 0 being used properly?
-    int         turnNumber;   // resets to 0 each new round
     bool        gestureHasOccurred(string message);     // prevent duplicating gestures per round
     string      previousActions[NUM_TURNS];  // prevent repeating actions per round, history of moves. gets cleared every round start
-    bool        isSpy;    // set when client receives "spy" or "notspy"
     int         spyAccordingToServer;  // relates to connectedclient
     void        execute(string gesture);   // the moment a turn begins, timers start
     void        updateOnceASecond();
@@ -130,15 +139,14 @@ private:
 
 // SENSORS
 	ofVec3f         accel, normAccel, filteredAccel;
-    ofVec3f         userAccelerationArray[SENSOR_DATA_ARRAY_SIZE];
     int             accelIndex = 0;  // filter array index
     float           getMaxSensorScale(); // grab max value from deltaOrientation;
+    float           sumSensors();  // a general sense for how much movement is happening
     //updated sensor
     ofMatrix3x3     deltaOrientation;  // change in orientation. at rest, is the identity matrix
     void            logMatrix3x3(ofMatrix3x3 matrix);
     void            logMatrix4x4(ofMatrix4x4 matrix);
 
-    
     // UNUSED?
     float screenScale;
     unsigned long long recordedTimes[16];  // index [0] is always for self. server utilizes all the rest of the indexes, correlates to clientID

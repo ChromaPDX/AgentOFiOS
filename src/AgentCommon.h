@@ -16,7 +16,7 @@
 #define NUM_PLACES 8
 #define NUM_TURNS 3  // per round
 #define ACTION_TIME 3000  // 3 seconds to execute action
-#define SENSOR_DATA_ARRAY_SIZE 128
+#define SENSOR_DATA_ARRAY_SIZE 12
 
 typedef enum
 {

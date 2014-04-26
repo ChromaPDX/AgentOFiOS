@@ -72,6 +72,9 @@ private:
     ofImage         circleBlack;
     ofImage         circleShadow;
     
+    float spin = 0.0;  // spin angle for end animation
+    float spinSpeed = 0.0;
+    
 };
 
 #endif /* defined(__DoubleAgent__AgentView__) */
