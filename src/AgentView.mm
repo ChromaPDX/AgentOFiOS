@@ -484,14 +484,14 @@ void AgentView::draw(ProgramState state, NetworkState networkState, long elapsed
         int i1 = controller->turnNumber - 1;
         if(i1 < 0) i1 = 0;
         if(i1 >= NUM_TURNS) i1 = NUM_TURNS-1;
+        
+        // bezier curves are complicated, and this code is messy, sorry!
         for(int t = 0; t <= i1; t++){
             ofSetColor(primaries[complementaries[primaryColor*3+(t)]]);
-            //ofSetColor(6, 140, 210, 100);   // blue motion shape
-            //ofSetColor(74,193,255, 50); // blue motion shape border
             ofFill();
             ofBeginShape();
             float innerRadius = width*.3;//1125;
-            float outerRadius = width*.1;
+            float outerRadius = width*.18;
             float deltaAngle = TWO_PI / (float)SENSOR_DATA_ARRAY_SIZE;
             float angle = 0;
             
@@ -500,12 +500,24 @@ void AgentView::draw(ProgramState state, NetworkState networkState, long elapsed
                 if(controller->recordedSensorData[t][i] > max)
                     max = controller->recordedSensorData[t][i];
             }
-            ofVertex(centerX, centerY-innerRadius);
+            float x = centerX + innerRadius * sin(angle-deltaAngle);
+            float y = centerY + innerRadius * -cos(angle-deltaAngle);
+            float presentMagnitude, previousMagnitude = 0;  // to make a bezier vertex, you need to bulid the previous point's control point's magnitude
+            bool notTheLastOne = 1;
+            ofVertex(x, y);
             for(int i = 0; i < SENSOR_DATA_ARRAY_SIZE; i++){
-                float x = centerX + innerRadius * sin(angle)  + outerRadius / max * sin(angle)  * controller->recordedSensorData[t][i];
-                float y = centerY + innerRadius * -cos(angle) + outerRadius / max * -cos(angle) * controller->recordedSensorData[t][i];
+                if(i == SENSOR_DATA_ARRAY_SIZE - 1) notTheLastOne = 0;  // forces the last entry back to the circle to prevent an overhanging edge
+                presentMagnitude = controller->recordedSensorData[t][i] / max * notTheLastOne;
+                x = centerX + innerRadius * sin(angle)  + outerRadius * sin(angle) * presentMagnitude;
+                y = centerY + innerRadius * -cos(angle) + outerRadius * -cos(angle) * presentMagnitude;
 //                ofVertex(x,y);
-                ofBezierVertex(x-cosf(angle)*40, y-sinf(angle)*40, x, y, x, y);
+                ofBezierVertex(centerX + innerRadius * sin(angle-.6666*deltaAngle) + outerRadius * sin(angle-.6666*deltaAngle) * previousMagnitude,
+                               centerY + innerRadius * -cos(angle-.6666*deltaAngle) + outerRadius * -cos(angle-.6666*deltaAngle) * previousMagnitude,
+                               centerX + innerRadius * sin(angle-.3333*deltaAngle) + outerRadius * sin(angle-.3333*deltaAngle) * presentMagnitude,
+                               centerY + innerRadius * -cos(angle-.3333*deltaAngle) + outerRadius * -cos(angle-.3333*deltaAngle) * presentMagnitude,
+                               x,
+                               y);
+                previousMagnitude = presentMagnitude;
                 angle += deltaAngle;
             }
             
