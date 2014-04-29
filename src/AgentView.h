@@ -71,6 +71,7 @@ private:
     ofImage         circleWhite;
     ofImage         circleBlack;
     ofImage         circleShadow;
+    ofImage         lightShadow;  // entry page, spotlight
     
     float spin = 0.0;  // spin angle for end animation
     float spinSpeed = 0.0;

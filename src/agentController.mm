@@ -64,6 +64,7 @@ void agentController::exit() {
 
 void agentController::updateSlowTCP(){
     if(isServer){
+        // send list of clients
         string clientString;
         clientString.push_back('$');
         clientString.push_back(avatarSelf);
@@ -76,6 +77,16 @@ void agentController::updateSlowTCP(){
             }
         }
         sendMessage(clientString);
+        
+        // send whoever is the spy
+        
+        if(state == StateDecide || state == StateTurnComplete || state == StateTurnGesture || state == StateTurnScramble){
+            string whoisspy;
+            whoisspy.push_back('&');
+            whoisspy.push_back(spyAvatar);
+            whoisspy.push_back(spyColor);
+            sendMessage(whoisspy);
+        }
 //        sendMessage(ofToString(connectedAgents));   // send number of clients
     }
 //    else if (isClient) { }
@@ -174,6 +185,11 @@ void agentController::updateTCP() {
             else if (strcmp(receivedText, "LOSE") == 0) {
                 mainMessage = "LOSE";
                 updateState(StateGameOver);
+            }
+            else if (Rx[0] == '&'){
+                // server is sendind you the icon and color of the spy
+                spyAvatar = Rx[1];
+                spyColor = Rx[2];
             }
             else if (Rx[0] == '$'){
                 // dollar sign encoding: connected players info, $cc$cc$cc$cc... etc.
@@ -302,9 +318,19 @@ void agentController::generateNewSpyRoles(){
             spyAccordingToServer = rand() % (server.getLastID() + 1);
         } while (!server.isClientConnected(spyAccordingToServer - 1) && spyAccordingToServer != 0);
         
-        // tell everyone that they are the spy or not the spy
-        if(spyAccordingToServer == 0){ isSpy = true; agentView.setIsSpy(isSpy); }
-        else { isSpy = false; agentView.setIsSpy(isSpy); }
+        // save the spy's identity, and tell everyone that they are the spy or not the spy
+        if(spyAccordingToServer == 0){
+            spyAvatar = avatarSelf;
+            spyColor = agentView.primaryColor + 1;
+            isSpy = true;
+            agentView.setIsSpy(isSpy);
+        }
+        else {
+            spyAvatar = avatarIcons[spyAccordingToServer-1];
+            spyColor = avatarColors[spyAccordingToServer-1];
+            isSpy = false;
+            agentView.setIsSpy(isSpy);
+        }
         for(int i = 1; i < server.getLastID() + 1; i++){
             if(server.isClientConnected(i-1)){
                 if( spyAccordingToServer == i) server.send(i-1, "spy");
@@ -481,11 +507,6 @@ void agentController::updateState(ProgramState newState){
     else if(state == StateTurnGesture) printf("STATE TURN gesture\n");  // server initiated at the end of execute()
     else if(state == StateTurnComplete){ printf("STATE TURN complete\n");    // server initiated by sendMessage("stateTurnComplete")
 
-        for(int i = 0; i < NUM_TURNS; i++){
-            for(int j = 0; j < SENSOR_DATA_ARRAY_SIZE; j++){
-                printf("%d: %f\n", i, recordedSensorData[i][j]);
-            }
-        }
     }
     else if(state == StateDecide) printf("STATE decide\n");          // initiated by server sendMessage("stateDecide")
     else if(state == StateGameOver) printf("STATE gameOver\n");        // initiated by server sendMessage "WIN" / "LOSE"

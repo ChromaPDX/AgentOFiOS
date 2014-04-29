@@ -47,6 +47,9 @@ void AgentView::setup(){
     circleShadow.loadImage("circleShadow.png");
     circleShadow.setAnchorPercent(.5, .5);
     
+    lightShadow.loadImage("lightShadow.png");
+    lightShadow.setAnchorPercent(0.5, 0.5);
+    
     avatarCoords[0*2+0] = centerX;      avatarCoords[0*2+1] = height*.75;
     avatarCoords[1*2+0] = centerX;      avatarCoords[1*2+1] = height*.5;
     avatarCoords[2*2+0] = width*.25;    avatarCoords[2*2+1] = height*.66;
@@ -146,9 +149,10 @@ void AgentView::draw(ProgramState state, NetworkState networkState, long elapsed
     
     if(state == StateWelcomeScreen){
         ofSetColor(255, 255);
+        lightShadow.draw(centerX, centerY);
         fontLarge.drawString("DOUBLE", centerX - fontLarge.stringWidth("DOUBLE")/2., height*.2);
         fontLarge.drawString("AGENT",  centerX - fontLarge.stringWidth("AGENT")/2., height*.2 + fontLarge.stringHeight("AGENT"));
-        fontTiny.drawString("A GAME OF RIDICULOUS GESTURES", centerX - fontTiny.stringWidth("A GAME OF RIDICULOUS GESTURES")/2., height*.2 + fontLarge.stringHeight("AGENT")*2.0);
+        fontTiny.drawString("GAME OF RIDICULOUS GESTURES", centerX - fontTiny.stringWidth("GAME OF RIDICULOUS GESTURES")/2., height*.2 + fontLarge.stringHeight("AGENT")*2.0);
         fontLarge.drawString("BEGIN", centerX - fontLarge.stringWidth("BEGIN")/2., height*.75 - fontLarge.stringHeight("BEGIN")*.5);
 
         ofDrawPlane(width*.5, height-50, width, 100);
@@ -165,16 +169,20 @@ void AgentView::draw(ProgramState state, NetworkState networkState, long elapsed
             alpha = 255*transition;
         }
         ofSetColor(255, alpha);
+        lightShadow.draw(centerX, centerY);
         fontLarge.drawString("DOUBLE", centerX - fontLarge.stringWidth("DOUBLE")/2., height*.2);
         fontLarge.drawString("AGENT",  centerX - fontLarge.stringWidth("AGENT")/2., height*.2 + fontLarge.stringHeight("AGENT"));
-        fontTiny.drawString("A GAME OF RIDICULOUS GESTURES", centerX - fontTiny.stringWidth("A GAME OF RIDICULOUS GESTURES")/2., height*.2 + fontLarge.stringHeight("AGENT")*2.0);
-        string hostString = "HOST";
-        string clientString = "JOIN";
-        string backString = "< BACK";
-        string thirdString;
-        
+        fontTiny.drawString("GAME OF RIDICULOUS GESTURES", centerX - fontTiny.stringWidth("GAME OF RIDICULOUS GESTURES")/2., height*.2 + fontLarge.stringHeight("AGENT")*2.0);
+        font.drawString("HOST", width*.3 - font.stringWidth("HOST")/2., height*.6 - font.stringHeight("HOST")/2.);
+        font.drawString("JOIN", width*.7 - font.stringWidth("JOIN")/2., height*.6 - font.stringHeight("JOIN")/2.);
+       
 
-        avatars[controller->avatarSelf].draw(centerX, height*.75, 100, 100);
+        ofSetColor(255, 255);
+        circleShadow.draw(centerX, height*.75, 240, 240);
+        ofSetColor(primaries[primaryColor]);
+        circleWhite.draw(centerX, height*.75, 200, 200);
+        ofSetColor(255, 255);
+        avatars[controller->avatarSelf].draw(centerX, height*.75, 150, 150);
 
         float yPos = height-50;
         if(transitionActive){
@@ -185,8 +193,6 @@ void AgentView::draw(ProgramState state, NetworkState networkState, long elapsed
         }
         
 //        if(networkState == NetworkNone){
-            font.drawString("HOST", width*.25 - font.stringWidth("HOST")/2., height*.6 - font.stringHeight("HOST")/2.);
-            font.drawString("JOIN", width*.75 - font.stringWidth("JOIN")/2., height*.6 - font.stringHeight("JOIN")/2.);
             ofSetColor(255, 255);
             ofDrawPlane(width*.5, yPos, width, 100);
             ofSetColor(0,255);
@@ -432,11 +438,10 @@ void AgentView::draw(ProgramState state, NetworkState networkState, long elapsed
             float diameter = width*.75;
             ofSetColor(255, 255);
             circleShadow.draw(centerX, centerY, diameter, diameter);
-            ofSetColor(primaries[primaryColor]);
+            ofSetColor(primaries[controller->spyColor-1]);
             circleWhite.draw(centerX, centerY, diameter*.83, diameter*.83);
             ofSetColor(255, 255);
-            avatars[controller->avatarSelf].draw(centerX, centerY, diameter*.625, diameter*.625);
-
+            avatars[controller->spyAvatar].draw(centerX, centerY, diameter*.625, diameter*.625);
         }
         else if (controller->mainMessage.compare("CAPTURED") == 0) {  // same as WIN, but this means you were the double agent
             font.drawString("CAPTURED", centerX-font.stringWidth("CAPTURED")*.5, height*.83-font.stringHeight("CAPTURED")*.5);

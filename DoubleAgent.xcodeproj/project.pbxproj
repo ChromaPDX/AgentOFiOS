@@ -41,6 +41,7 @@
 		BB16EBD90F2B2AB500518274 /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BB16EBD80F2B2AB500518274 /* QuartzCore.framework */; };
 		BBE5EAB80F49AD8400F28951 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BBE5EAB70F49AD8400F28951 /* AudioToolbox.framework */; };
 		C4782ECC372420ACE0615B74 /* OscPrintReceivedElements.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BC8881B3C8C0A1C45F042E7A /* OscPrintReceivedElements.cpp */; };
+		D500FEB6190EF128009F3973 /* lightShadow.png in Resources */ = {isa = PBXBuildFile; fileRef = D500FEB5190EF128009F3973 /* lightShadow.png */; };
 		D51BE0B4188DE0C900359972 /* fingerprint.png in Resources */ = {isa = PBXBuildFile; fileRef = D51BE0B3188DE0C900359972 /* fingerprint.png */; };
 		D51BE0B7188DF21B00359972 /* reticle_outline.png in Resources */ = {isa = PBXBuildFile; fileRef = D51BE0B5188DF21B00359972 /* reticle_outline.png */; };
 		D51BE0B8188DF21B00359972 /* reticle_compass.png in Resources */ = {isa = PBXBuildFile; fileRef = D51BE0B6188DF21B00359972 /* reticle_compass.png */; };
@@ -153,6 +154,7 @@
 		C2FAC65C491D4231379F3298 /* ofxOscReceiver.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 30; name = ofxOscReceiver.cpp; path = ../../../addons/ofxOsc/src/ofxOscReceiver.cpp; sourceTree = SOURCE_ROOT; };
 		C58862C6D212C8E8A83810F4 /* ofxOscMessage.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 30; name = ofxOscMessage.h; path = ../../../addons/ofxOsc/src/ofxOscMessage.h; sourceTree = SOURCE_ROOT; };
 		C6937888E126BADC8777423B /* OscTypes.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 30; name = OscTypes.h; path = ../../../addons/ofxOsc/libs/oscpack/src/osc/OscTypes.h; sourceTree = SOURCE_ROOT; };
+		D500FEB5190EF128009F3973 /* lightShadow.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = lightShadow.png; sourceTree = "<group>"; };
 		D51BE0B3188DE0C900359972 /* fingerprint.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = fingerprint.png; sourceTree = "<group>"; };
 		D51BE0B5188DF21B00359972 /* reticle_outline.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = reticle_outline.png; sourceTree = "<group>"; };
 		D51BE0B6188DF21B00359972 /* reticle_compass.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = reticle_compass.png; sourceTree = "<group>"; };
@@ -461,6 +463,7 @@
 				D51BE0B6188DF21B00359972 /* reticle_compass.png */,
 				D5778379188F12B80038156E /* inside_circle.png */,
 				D5D387C21891E3E200208CD3 /* inside_circle_w_fade.png */,
+				D500FEB5190EF128009F3973 /* lightShadow.png */,
 				D577837B188F206F0038156E /* reticle_inside.png */,
 				D51BE0B3188DE0C900359972 /* fingerprint.png */,
 				61ED8A1718AEE4C2002333A6 /* decrement.png */,
@@ -582,6 +585,7 @@
 				D53FA2FF1908675E00A5D0CC /* clickUp.mp3 in Resources */,
 				D53FA2F51905B44D00A5D0CC /* circleShadow.png in Resources */,
 				61ED8A1A18AEE4C2002333A6 /* increment.png in Resources */,
+				D500FEB6190EF128009F3973 /* lightShadow.png in Resources */,
 				61E1E17F187367DE006EF1AB /* Instructions.txt in Resources */,
 				D53FA2E81901B01900A5D0CC /* lion.png in Resources */,
 				678E130A17951536005B6D19 /* Icon.png in Resources */,
