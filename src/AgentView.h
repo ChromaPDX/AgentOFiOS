@@ -25,7 +25,9 @@ public:
     agentController *controller;  // delegate
 
     void    setup(); // must be called
-    void    draw(ProgramState state, NetworkState networkState, long elapsedMillis, long stateBeginTime, bool transitionActive, long transitionDuration, long transitionEndTime);
+    void    draw(ProgramState state, NetworkState networkState, long elapsedMillis, long stateBeginTime,
+                 bool transitionActive, long transitionDuration, long transitionEndTime,
+                 bool errorMessageActive, string errorMessage, long errorBeginTime);
     
     void    setWIFIExist(bool w);
     void    setIsServer(bool s);

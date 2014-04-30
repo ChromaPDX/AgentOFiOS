@@ -110,7 +110,7 @@ void AgentView::setIsSpy(bool s){
     isSpy = s;
 }
 
-void AgentView::draw(ProgramState state, NetworkState networkState, long elapsedMillis, long stateBeginTime, bool transitionActive, long transitionDuration, long transitionEndTime){
+void AgentView::draw(ProgramState state, NetworkState networkState, long elapsedMillis, long stateBeginTime, bool transitionActive, long transitionDuration, long transitionEndTime, bool errorMessageActive, string errorMessage, long errorBeginTime){
     
     ofClear(primaries[primaryColor]);
     
@@ -555,5 +555,20 @@ void AgentView::draw(ProgramState state, NetworkState networkState, long elapsed
         circleWhite.draw(centerX, centerY, diameter*.83, diameter*.83);  // .6225
         ofSetColor(255, 255);
         avatars[controller->avatarSelf].draw(centerX, centerY, diameter*.625, diameter*.625);
+    }
+    
+    
+    // ERROR MESSAGE DELIVERY
+    
+    if(errorMessageActive){
+        float fade = (elapsedMillis - (errorBeginTime + 1500))/(ERROR_MESSAGE_DURATION*.25);
+        if(fade < 0) fade = 0;
+        fade = 1-fade;
+        ofSetColor(0, 80*fade);
+        ofRect(0, 0, width, height);
+        ofSetColor(255, 255*fade);
+        ofRect(centerX-width*.475, centerY-width*.15, width*.95, width*.3);
+        ofSetColor(255, 0, 0, 255*fade);
+        fontSmall.drawString(errorMessage, centerX-fontSmall.stringWidth(errorMessage)*.5, centerY+fontSmall.stringHeight(errorMessage)*.5);
     }
 }

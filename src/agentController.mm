@@ -41,7 +41,7 @@ void agentController::setup() {
 }
 
 void agentController::draw() {
-    agentView.draw(state, networkState, elapsedMillis, stateBeginTime, transitionActive, transitionDuration, transitionEndTime);
+    agentView.draw(state, networkState, elapsedMillis, stateBeginTime, transitionActive, transitionDuration, transitionEndTime, errorMessageActive, errorMessage, errorBeginTime);
 }
 
 void agentController::pause(){
@@ -202,6 +202,11 @@ void agentController::updateTCP() {
                     }
                 }
                 printf("UPDATED FRIEND COUNT: %d",avatarNum);
+                // make sure all the other spots don't have ghosts of former players
+                do{
+                    avatarIcons[avatarNum] = 0;
+                    avatarNum++;
+                } while (avatarNum < 256);
             }
             else {
                 // improve this.
@@ -433,13 +438,19 @@ void agentController::updateState(ProgramState newState){
     
     if(state == StateWelcomeScreen);
     else if(state == StateConnectionScreen){
-        if (isServer){ stopServer(); }
-        if (isClient){ client.close(); isClient = false; }
+        if (server.isConnected()){ stopServer(); }
+        if (client.isConnected()){ client.close(); isClient = false; }
         networkState = NetworkNone;
         printf("STATE connectionScreen\n");
     }
     else if(state == StateJoinScreen) printf("STATE joinScreen\n");
-    else if(state == StateReadyRoom) printf("STATE readyRoom\n");
+    else if(state == StateReadyRoom){
+//        if(isClient){
+//            for(int i = 0; i < 256; i++)
+//                avatarIcons[i] = 0;
+//        }
+        printf("STATE readyRoom\n");
+    }
     else if(state == StateStartGame){                               // initiated by server sendMessage("stateStartGame")
         for(int j = 0; j < NUM_TURNS; j++){
             for(int i = 0; i < SENSOR_DATA_ARRAY_SIZE; i++)
@@ -569,6 +580,13 @@ void agentController::update() {
     if (isClient || isServer) {
         updateTCP();
     }
+    
+    if(errorMessageActive){
+        if(elapsedMillis > errorBeginTime + 2000){
+            errorMessageActive = false;
+        }
+    }
+
 }
 
 #pragma mark SENSORS
@@ -655,9 +673,16 @@ void agentController::touchMoved(int x, int y, int id) { }
 void agentController::touchEnded(int x, int y, int id) {
 //    clickUp.play();
     if(state == StateWelcomeScreen){
-        avatarSelf = ofRandom(1, 9);
-        printf("AVATAR CHOSE: %d\n",avatarSelf);
-        updateState(StateConnectionScreen);
+        if(isConnectedToWIFI()){
+            avatarSelf = ofRandom(1, 9);
+            printf("AVATAR CHOSE: %d\n",avatarSelf);
+            updateState(StateConnectionScreen);
+        }
+        else{
+            errorMessageActive = true;
+            errorMessage = "game requires WIFI";
+            errorBeginTime = elapsedMillis;
+        }
     }
     else if(state == StateConnectionScreen){
         if(y > height * .5 && y < height * .7){
@@ -741,6 +766,9 @@ void agentController::touchEnded(int x, int y, int id) {
             }
             else{
                 // deliver message: "game requires at least 3 players"
+                errorMessage = "requires at least 3 players";
+                errorMessageActive = true;
+                errorBeginTime = elapsedMillis;
             }
         }
     }

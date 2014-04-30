@@ -131,6 +131,11 @@ private:
     long            transitionDuration;
     bool            transitionActive = false;
     
+// ERROR HANDLING
+    bool            errorMessageActive = false;
+    string          errorMessage;
+    long            errorBeginTime;
+    
 // NETWORKING
 	ofxTCPServer    server;
 	ofxTCPClient    client;
