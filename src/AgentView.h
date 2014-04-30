@@ -47,8 +47,6 @@ private:
     
     float   transition;  // 0 - 1, from beginning of transition to end, use for animations
 
-    void    drawInGameBackground();  // reticle
-
     float   avatarCoords[NUM_AVATAR_COORDS*2]; // first 9 avatar positions in the ready room. the rest are randomly placed
     
     char    spymess[5];  // scrambled text

@@ -164,11 +164,6 @@ void agentController::updateTCP() {
                 isSpy = false;
                 agentView.setIsSpy(isSpy);
             }
-            else if (strcmp(receivedText, "stateTurnComplete") == 0){
-                useScrambledText = false;
-                mainMessage = "TurnOVER BLA BLA not being displayed anyway";
-                updateState(StateTurnComplete);
-            }
             else if (strcmp(receivedText, "stateDecide") == 0) {
                 ((testApp*) ofGetAppPtr())->vibrate(true);
                 mainMessage = "OPERATIVE I.D.";  // "PICK"
@@ -222,15 +217,6 @@ void agentController::updateTCP() {
                         updateState(StateTurnScramble);
                     }
                 }
-//                for (int g = 0; g < NUM_PLACES; g++) {
-//                    if (strcmp(receivedText, placeString[g].c_str()) == 0) {
-//                        useScrambledText = false;
-//                        mainMessage = Rx;
-//                        wasTurnRelated = true;
-//                        state = StateTurnComplete;
-//                        //turnState = TurnStateWaiting;                                                                           // turnState  :  waiting      (client)
-//                    }
-//                }
                 if(!wasTurnRelated){  // nothing. can we count on this being a number? maybe.
                     connectedAgents = ofToInt(Rx);
                 }
@@ -400,7 +386,8 @@ void agentController::execute(string gesture){
     else if (strcmp(mess, "HIGH FIVE\nNEIGHBOR") == 0 ||
              strcmp(mess, "POINT AT\nAN AGENT") == 0 ||
              strcmp(mess, "STAND ON\nONE LEG") == 0 ||
-             strcmp(mess, "MAKE YOUR\nANIMAL'S SOUND")) {
+             strcmp(mess, "MAKE YOUR\nANIMAL'S SOUND") ||
+             strcmp(mess, "TOUCH YOUR TOES")) {
         recordMode = RecordModeNothing;
     }
     else {
@@ -435,47 +422,6 @@ void agentController::pickedAgent(int agent) {
     updateState(StateGameOver);
 }
 
-
-// server only function
-void agentController::countScores(){
-
-    server.sendToAll("stateTurnComplete");
-
-//    int places[16];
-//    for (int p = 0; p < 16; p++) {
-//        places[p] = -1;
-//    }
-//    for(int i = 0; i < server.getLastID() + 1; i++) {   // getLastID is UID of all clients
-//        int lowestTime = 100000;
-//        for(int j = 0; j < server.getLastID() + 1; j++){ // getLastID is UID of all clients
-//            if (recordedTimes[j] <= lowestTime) {
-//                bool shouldRecord = true;
-//                for (int p = 0; p < 16; p++) {
-//                    if (places[p] == j) {
-//                        shouldRecord = false;
-//                    }
-//                }
-//                if (shouldRecord) {
-//                    lowestTime = recordedTimes[j];
-//                    places[i] = j;
-//                }
-//            }
-//        }
-//        ofLogNotice("PLACES") << ofToString(places[i]) + " is in " + ofToString(i) + " place with " + ofToString(recordedTimes[places[i]]) + "time";
-//    }
-//    for(int i = 0; i < server.getLastID() + 1; i++) { // getLastID is UID of all clients
-//        if (places[i] != 0) {
-//            if( server.isClientConnected(places[i] - 1) ) { // check and see if it's still around
-//                server.send(places[i]-1, placeString[i]);
-//            }
-//        }
-//        else {
-//            mainMessage = placeString[i];
-//        }
-//    }
-}
-
-
 #pragma mark SCRIPTS
 
 // transition program immediately into another scene.
@@ -508,7 +454,7 @@ void agentController::updateState(ProgramState newState){
         turnNumber++;
     }
     else if(state == StateTurnGesture) printf("STATE TURN gesture\n");  // server initiated at the end of execute()
-    else if(state == StateTurnComplete){ printf("STATE TURN complete\n");    // server initiated by sendMessage("stateTurnComplete")
+    else if(state == StateTurnComplete){ printf("STATE TURN complete\n");
 
     }
     else if(state == StateDecide) printf("STATE decide\n");          // initiated by server sendMessage("stateDecide")
@@ -583,7 +529,7 @@ void agentController::update() {
         if(elapsedMillis > stateBeginTime + ACTION_TIME)
             updateState(StateTurnComplete);
     }
-    else if(state == StateTurnComplete){    // initiated by server sendMessage("stateTurnComplete")
+    else if(state == StateTurnComplete){
         if(isServer && elapsedMillis > stateBeginTime + 4000){
             if(turnNumber < NUM_TURNS){
                 serverInitiateRound();
@@ -625,46 +571,6 @@ void agentController::update() {
     }
 }
 
-
-
-//        if(turnState == TurnStateAction){
-//            float turnProgress = (float)(ofGetElapsedTimeMillis() - turnTime) / ACTION_TIME;   // from 0 to 1
-//            int index = SENSOR_DATA_ARRAY_SIZE*turnProgress;
-//            if(index < 0) index = 0;
-//            if(index >= SENSOR_DATA_ARRAY_SIZE) index = SENSOR_DATA_ARRAY_SIZE-1;
-//            float maxScale = 4*getMaxSensorScale() + 1.;
-//            recordedSensorData[(turnNumber-1)*SENSOR_DATA_ARRAY_SIZE + index] = maxScale;
-//        }
-//
-        
-        
-//        if(gameState == GameStateGameOver){
-//            if (ofGetElapsedTimeMillis() - stepTimer > stepInterval ){
-//                gameState = GameStateReadyRoom;
-//                mainMessage = "";
-//                stepInterval = 1000;
-//                step = 0;
-//                stepTimer = ofGetElapsedTimeMillis();
-//            }
-//        }
-//        else{
-//            if (stepInterval){
-//                if (ofGetElapsedTimeMillis() - stepTimer > stepInterval ){
-//                    step++;
-//                    if (step > 0){
-//                        if (stepFunction != NULL) {
-//                            (this->*stepFunction)(step);
-//                        }
-//                    }
-//                    if (step > numSteps){
-//                        stepInterval = 0;
-//                    }
-//                    stepTimer = ofGetElapsedTimeMillis();
-//                }
-//            }
-//        }
-
-
 #pragma mark SENSORS
 
 //--------------------------------------------------------------
@@ -701,7 +607,7 @@ void agentController::touchBegan(int x, int y, int id){
     else if(state == StateCountdown);
     else if(state == StateTurnScramble);
     else if(state == StateTurnGesture);
-    else if(state == StateTurnComplete);    // initiated by server sendMessage("stateTurnComplete")
+    else if(state == StateTurnComplete);
     else if(state == StateDecide);          // initiated by server sendMessage("stateDecide")
     else if(state == StateGameOver);        // initiated by server sendMessage "WIN" / "LOSE"
 
@@ -842,7 +748,7 @@ void agentController::touchEnded(int x, int y, int id) {
     else if(state == StateCountdown);
     else if(state == StateTurnScramble);
     else if(state == StateTurnGesture);
-    else if(state == StateTurnComplete);    // initiated by server sendMessage("stateTurnComplete")
+    else if(state == StateTurnComplete);
     else if(state == StateDecide);          // initiated by server sendMessage("stateDecide")
     else if(state == StateGameOver);        // initiated by server sendMessage "WIN" / "LOSE"
 
@@ -862,74 +768,6 @@ float agentController::getMaxSensorScale(){
 float agentController::sumSensors(){
     return fabs(deltaOrientation.b) + fabs(deltaOrientation.c) + fabs(deltaOrientation.d) + fabs(deltaOrientation.f) + fabs(deltaOrientation.g) + fabs(deltaOrientation.h);
 }
-
-//void agentController::updateAccel(ofVec3f newAccel){
-//    
-//    if (newAccel.x != accel.x ) {
-//        
-//        accel = newAccel;
-//        normAccel = accel.getNormalized();
-//        
-//        accelIndex++;
-//        if (accelIndex > 127) {
-//            accelIndex = 0;
-//        }
-//        
-//        float alpha = 0.9f;
-//        
-//        filteredAccel.x = alpha * filteredAccel.x + (1 - alpha) * normAccel.x;
-//        filteredAccel.y = alpha * filteredAccel.y + (1 - alpha) * normAccel.y;
-//        filteredAccel.z = alpha * filteredAccel.z + (1 - alpha) * normAccel.z;
-//        
-////        userAccelerationArray[accelIndex] = filteredAccel;
-//        
-//        bool didIt = false;
-//        
-////        if (recordMode == GameActionJump || recordMode == GameActionShake) {
-////            if (accel.z > .5) {
-////                didIt = true;
-////            }
-////        }
-////
-////        else if (recordMode == GameActionSpin) {
-////            if (accel.y > .5) {
-////                didIt = true;
-////            }
-////        }
-//        
-//        if (didIt) {
-////            turnState = TurnStateActionSuccess;                                                                        // turnState  :  action Success
-//            recordedTimes[0] = ofGetElapsedTimeMillis() - turnTime;
-//            ((testApp*) ofGetAppPtr())->vibrate(true);
-//            
-//            if (isClient) {
-//                sendMessage(ofToString(recordedTimes[0]));
-//            }
-//        }
-//    }
-//}
-
-//bool agentController::processAcceleration() {
-//    
-//    bool foundHighZ;
-//    bool foundLowZ;
-//    
-//    for (int i = 0; i < 128; i++) {
-//        
-//        if (userAccelerationArray[i].z > 1) {
-//            foundHighZ = true;
-//        }
-//        if (userAccelerationArray[i].z < -1) {
-//            foundLowZ = true;
-//        }
-//    }
-//    
-//    if (foundLowZ && foundHighZ) {
-//        return 1;
-//    }
-//    else return 0;
-//}
-
 
 void agentController::logMatrix3x3(ofMatrix3x3 matrix){
     static int timeIndex;
@@ -963,7 +801,6 @@ void agentController::logMatrix4x4(ofMatrix4x4 matrix){
 void agentController::updateOrientation(ofMatrix3x3 newOrientationMatrix, ofMatrix3x3 newDeltaOrientationMatrix){
     orientation = newOrientationMatrix;
     deltaOrientation = newDeltaOrientationMatrix;
-//    logMatrix3x3(deltaOrientation);
 }
 
 #pragma mark SYSTEM

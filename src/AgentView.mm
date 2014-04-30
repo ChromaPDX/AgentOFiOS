@@ -52,10 +52,10 @@ void AgentView::setup(){
     
     avatarCoords[0*2+0] = centerX;      avatarCoords[0*2+1] = height*.75;
     avatarCoords[1*2+0] = centerX;      avatarCoords[1*2+1] = height*.5;
-    avatarCoords[2*2+0] = width*.25;    avatarCoords[2*2+1] = height*.66;
-    avatarCoords[3*2+0] = width*.75;    avatarCoords[3*2+1] = height*.66;
-    avatarCoords[4*2+0] = width*.25;    avatarCoords[4*2+1] = height*.33;
-    avatarCoords[5*2+0] = width*.75;    avatarCoords[5*2+1] = height*.33;
+    avatarCoords[2*2+0] = width*.25;    avatarCoords[2*2+1] = height*.625;
+    avatarCoords[3*2+0] = width*.75;    avatarCoords[3*2+1] = height*.625;
+    avatarCoords[4*2+0] = width*.25;    avatarCoords[4*2+1] = height*.375;
+    avatarCoords[5*2+0] = width*.75;    avatarCoords[5*2+1] = height*.375;
     avatarCoords[6*2+0] = centerX;      avatarCoords[6*2+1] = height*.25;
     avatarCoords[7*2+0] = width*.75;    avatarCoords[7*2+1] = height*.2;
     avatarCoords[8*2+0] = width*.25;    avatarCoords[8*2+1] = height*.2;
@@ -110,24 +110,6 @@ void AgentView::setIsSpy(bool s){
     isSpy = s;
 }
 
-// draw function outline
-// =====================
-//
-//clear background color
-//draw bottom white bar
-//if(gameState == GameStateLogin)
-//    draw login screen (multiple screens)
-//if(gameState == GameStateReadyRoom)
-//    draw avatars
-//if(gameState == GameStatePlaying)
-//    draw hexagon
-//if(gameState == GameStateDeciding)
-//    draw hexagon
-//if(gameState == GameStateGameOver)
-//    draw hexagon
-//
-
-//void AgentView::draw(GameState gameState, LoginStateState loginState, TurnState turnState, BOOL isSpy, int step, unsigned long stepInterval, unsigned long long stepTimer, BOOL isServer, BOOL isClient, int currentTurn)
 void AgentView::draw(ProgramState state, NetworkState networkState, long elapsedMillis, long stateBeginTime, bool transitionActive, long transitionDuration, long transitionEndTime){
     
     ofClear(primaries[primaryColor]);
@@ -155,13 +137,6 @@ void AgentView::draw(ProgramState state, NetworkState networkState, long elapsed
         fontTiny.drawString("A GAME OF", centerX - fontTiny.stringWidth("A GAME OF")/2., height*.45);
         fontTiny.drawString("RIDICULOUS GESTURES", centerX - fontTiny.stringWidth("RIDICULOUS GESTURES")*.5, height*.45 + fontTiny.stringHeight("AGENT")*1.5);
 
-        
-//        ofSetColor(255, 255);
-//        circleShadow.draw(centerX, height*.77, 240, 240);
-//        ofSetColor(primaries[primaryColor]);
-//        circleWhite.draw(centerX, height*.77, 200, 200);
-//        ofSetColor(255, 255);
-//        avatars[controller->avatarSelf].draw(centerX, height*.75, 150, 150);
         fontSmall.drawString("BEGIN", centerX - fontSmall.stringWidth("BEGIN")/2.-2, height*.77 + fontSmall.stringHeight("BEGIN")*.5);
 
         ofDrawPlane(width*.5, height-50, width, 100);
@@ -202,22 +177,10 @@ void AgentView::draw(ProgramState state, NetworkState networkState, long elapsed
             yPos += (1-curve)*150;
         }
         
-//        if(networkState == NetworkNone){
-            ofSetColor(255, 255);
-            ofDrawPlane(width*.5, yPos, width, 100);
-            ofSetColor(0,255);
-            fontTiny.drawString("ONLY ONE HOST IS NEEDED", width*.5 - fontTiny.stringWidth("ONLY ONE HOST IS NEEDED")/2., yPos + fontTiny.stringHeight("ONLY ONE HOST IS NEEDED")*.5);
-//        }
-        
-        
-//    case LoginStateServer:
-//        hostString = "JOIN CODE";
-//        clientString = controller->getCodeFromIp();
-//        fontMedium.drawString(backString,fontMedium.stringWidth(backString)*.35,ofGetHeight()*.1 - fontMedium.stringHeight(backString)/2.);
-//        font.drawString(hostString,ofGetWidth()/2 - font.stringWidth(hostString)/2.,ofGetHeight()*.4 - font.stringHeight(hostString)/2.);
-//        font.drawString(clientString,ofGetWidth()/2 - font.stringWidth(clientString)/2.,ofGetHeight()*.6 - font.stringHeight(clientString)/2.);
-//        break;
-        
+        ofSetColor(255, 255);
+        ofDrawPlane(width*.5, yPos, width, 100);
+        ofSetColor(0,255);
+        fontTiny.drawString("ONLY ONE HOST IS NEEDED", width*.5 - fontTiny.stringWidth("ONLY ONE HOST IS NEEDED")/2., yPos + fontTiny.stringHeight("ONLY ONE HOST IS NEEDED")*.5);
     }
     else if(state == StateJoinScreen){
         
@@ -234,7 +197,6 @@ void AgentView::draw(ProgramState state, NetworkState networkState, long elapsed
         ofSetColor(255, 255);
         fontLarge.drawString("JOIN",  centerX - fontLarge.stringWidth("JOIN")*.5, height*.66 + fontLarge.stringHeight("JOIN")*.5);
         fontMedium.drawString("QUIT", fontMedium.stringWidth("QUIT")*.15, height - fontMedium.stringHeight("QUIT")*.5);
-//        fontLarge.drawString(clientString, width/2. - fontLarge.stringWidth(clientString)/2.,height*.425 - fontLarge.stringHeight(clientString)/2.);
         fontLarge.drawString(digit1, width*.25 - fontLarge.stringWidth(digit1)*.5 - NUDGE, height*.42 - fontLarge.stringHeight(digit1)*.5);
         fontLarge.drawString(digit2, width*.5 - fontLarge.stringWidth(digit2)*.5 - NUDGE, height*.42 - fontLarge.stringHeight(digit2)*.5);
         fontLarge.drawString(digit3, width*.75 - fontLarge.stringWidth(digit3)*.5 - NUDGE, height*.42 - fontLarge.stringHeight(digit3)*.5);
@@ -244,69 +206,15 @@ void AgentView::draw(ProgramState state, NetworkState networkState, long elapsed
         decrement.draw(width*.25, height*.45, width*.2, width*.2);
         decrement.draw(width*.5, height*.45, width*.2, width*.2);
         decrement.draw(width*.75, height*.45, width*.2, width*.2);
-        
-        // X VALUES:
-        // middle left: width * .375
-        // middle right: width * .625
-        
-        // Y VALUES:
-        // middle of text: height * .325
-        // top row upper bounds:  height * .1
-        // top row lower bounds:  height * .3
-        // bottom row upper bounds: height * .35
-        // bottom row lower bounds: height * .55
-        
-//        }
-        
-//    case LoginStateConnecting:
-//        hostString = "CONNECTING TO";
-//        clientString = controller->getCodeFromInt(controller->loginCode);
-//        font.drawString(hostString,ofGetWidth()/2 - font.stringWidth(hostString)/2.,ofGetHeight()*.4 - font.stringHeight(hostString)/2.);
-//        font.drawString(clientString,ofGetWidth()/2 - font.stringWidth(clientString)/2.,ofGetHeight()*.6 - font.stringHeight(clientString)/2.);
-//        break;
-//        
-//    case LoginStateFailed:
-//        hostString = "BACK";
-//        clientString = "CONNECTION";
-//        thirdString = "FAILED";
-//        font.drawString(hostString,ofGetWidth()/2 - font.stringWidth(hostString)/2.,ofGetHeight()*.15 - font.stringHeight(hostString)/2.);
-//        font.drawString(clientString,ofGetWidth()/2 - font.stringWidth(clientString)/2.,ofGetHeight()*.5 - font.stringHeight(clientString)/2.);
-//        font.drawString(thirdString,ofGetWidth()/2 - font.stringWidth(thirdString)/2.,ofGetHeight()*.6 - font.stringHeight(thirdString)/2.);
-//        break;
-//        
-//    case LoginStateServerQuit:
-//        hostString = "BACK";
-//        clientString = "HOST STOPPED";
-//        thirdString = "THE GAME";
-//        font.drawString(hostString,ofGetWidth()/2 - font.stringWidth(hostString)/2.,ofGetHeight()*.15 - font.stringHeight(hostString)/2.);
-//        font.drawString(clientString,ofGetWidth()/2 - font.stringWidth(clientString)/2.,ofGetHeight()*.5 - font.stringHeight(clientString)/2.);
-//        font.drawString(thirdString,ofGetWidth()/2 - font.stringWidth(thirdString)/2.,ofGetHeight()*.6 - font.stringHeight(thirdString)/2.);
-//        break;
-//        
-//    case LoginStateNoIP:
-//        hostString = "NO ADDRESS";
-//        clientString = "CHECK WIFI ?";
-//        fontMedium.drawString(backString,fontMedium.stringWidth(backString)*.35,ofGetHeight()*.1 - fontMedium.stringHeight(backString)/2.);
-//        font.drawString(hostString,ofGetWidth()/2 - font.stringWidth(hostString)/2.,ofGetHeight()*.4 - font.stringHeight(hostString)/2.);
-//        font.drawString(clientString,ofGetWidth()/2 - font.stringWidth(clientString)/2.,ofGetHeight()*.6 - font.stringHeight(clientString)/2.);
-//        break;
     }
     else if(state == StateReadyRoom){
-//        drawAnimatedSphereBackground();
-        
-        
+    
         ofSetColor(255, 70);
-        
         wifiImage.draw(centerX, centerY, height, height);
-        
+
         ofSetColor(255, 255);
 
-        
-//        string backString = "< BACK";
-//        fontMedium.drawString(backString,fontMedium.stringWidth(backString)*.35,ofGetHeight()*.1 - fontMedium.stringHeight(backString)/2.);
-
-        int count = 0;
-        
+        int count = 0;   // increment through activeConnections
         if(isServer){
             ofSetColor(255, 255);
             circleShadow.draw(centerX, height*.77, 235, 235);
@@ -317,28 +225,25 @@ void AgentView::draw(ProgramState state, NetworkState networkState, long elapsed
             count++;
         }
         for(int i = 0; i < 256; i++){
-            if(controller->avatarIcons[i] != 0 &&  count < NUM_AVATAR_COORDS){  // todo make case for count > NUM_AVATAR_COORDS
+            if(controller->avatarIcons[i] != 0){
+                float posX, posY;
+                if(count < NUM_AVATAR_COORDS){
+                    posX = avatarCoords[count*2+0];
+                    posY = avatarCoords[count*2+1];
+                }
+                else{
+                    posX = ofRandom(width*.2, width*.8);
+                    posY = ofRandom(height*.2, height*.8);
+                }
                 ofSetColor(255, 255);
-                circleShadow.draw(avatarCoords[count*2+0], avatarCoords[count*2+1], 235, 235);
+                circleShadow.draw(posX, posY, 235, 235);
                 ofSetColor(primaries[controller->avatarColors[i]-1]);
-                circleWhite.draw(avatarCoords[count*2+0], avatarCoords[count*2+1], 200, 200);
+                circleWhite.draw(posX, posY, 200, 200);
                 ofSetColor(255, 255);
-                avatars[controller->avatarIcons[i]].draw(avatarCoords[count*2+0], avatarCoords[count*2+1], 150, 150);
+                avatars[controller->avatarIcons[i]].draw(posX, posY, 150, 150);
                 count++;
             }
         }
-
-//        float fade = 255;
-//        if(step == 1 || step == 9)
-//            fade = 255. * (float)(ofGetElapsedTimeMillis() - stepTimer) / stepInterval;
-//        else if(step == 7 || step == 15)
-//            fade = 255. * (1 - (float)(ofGetElapsedTimeMillis() - stepTimer) / stepInterval );
-//        ofSetColor(255, 255, 255, fade);
-//        if(step >= 1 && step < 8)
-//            fontMedium.drawString("MESSAGE FROM HQ:\n\nWe have a detected\na double agent in your\nmidst. HQ will send\nthree encrypted commands\nfor all agents to\nenact simultaneously.", 20, centerY-200);
-//        else if(step >= 9 && step < 16)
-//            fontMedium.drawString("The double agent will\nonly receive scrambled\ncommands and will attempt\nto mimic the movements\nof the other agents.\nWatch your team closely!\n\nEND OF MESSAGE", 20, centerY-200);
-        
         if (isServer){
             ofSetColor(255);
             
@@ -360,13 +265,24 @@ void AgentView::draw(ProgramState state, NetworkState networkState, long elapsed
     else if(state == StateStartGame){
         ofClear(0, 255);
         ofSetColor(255, 255);
-        if(elapsedMillis > stateBeginTime + 1000){
-            if(isSpy)   font.drawString("shhh", centerX-font.stringWidth("shhh")/2., centerY);
-            else        font.drawString("AGENT", centerX-font.stringWidth("AGENT")/2., centerY);
+        if(isSpy){
+            if(elapsedMillis > stateBeginTime + 1000){
+                font.drawString("shhh", centerX-font.stringWidth("shhh")/2., centerY);
+            }
+            if(elapsedMillis > stateBeginTime + 2000){
+                fontSmall.drawString("you are the double agent",centerX - fontSmall.stringWidth("you are the double agent")/2., centerY+font.stringHeight("you are the double agent"));
+            }
         }
-        if(elapsedMillis > stateBeginTime + 2000){
-            if(isSpy)   fontSmall.drawString("you are the double agent",centerX - fontSmall.stringWidth("you are the double agent")/2., centerY+font.stringHeight("shhh"));
-            else        fontSmall.drawString("prepare yourself", centerX - fontSmall.stringWidth("prepare yourself")/2., centerY+font.stringHeight("AGENT"));
+        else{
+            if(elapsedMillis > stateBeginTime + 750){
+                font.drawString("shhh", centerX-font.stringWidth("shhh")/2., centerY-font.stringHeight("shhh"));
+            }
+            if(elapsedMillis > stateBeginTime + 1500){
+                fontSmall.drawString("(relax)", centerX-fontSmall.stringWidth("(relax)")/2., centerY);
+            }
+            if(elapsedMillis > stateBeginTime + 2250){
+                fontSmall.drawString("you are NOT the double agent", centerX - fontSmall.stringWidth("you are NOT the double agent")/2., centerY+font.stringHeight("you are NOT the double agent"));
+            }
         }
     }
     else if(state == StateCountdown){
@@ -395,6 +311,29 @@ void AgentView::draw(ProgramState state, NetworkState networkState, long elapsed
 
         ofSetColor(255, 255);
         string countdownString;
+        if(elapsedMillis > stateBeginTime + 7000){
+            countdownString = "";
+        }
+        else if(elapsedMillis > stateBeginTime + 6000){
+            countdownString = "1";
+            float fader = (elapsedMillis - (stateBeginTime+6000)) / 1000.0;
+            ofSetColor(255, (1-fader) * 255);
+        }
+        else if(elapsedMillis > stateBeginTime + 5000){
+            countdownString = "2";
+            float fader = (elapsedMillis - (stateBeginTime+5000)) / 1000.0;
+            ofSetColor(255, (1-fader) * 255);
+        }
+        else if(elapsedMillis > stateBeginTime + 4000){
+            countdownString = "3";
+            float fader = (elapsedMillis - (stateBeginTime+4000)) / 1000.0;
+            ofSetColor(255, (1-fader) * 255);
+        }
+        else {
+            countdownString = "";
+        }
+        fontLarge.drawString(countdownString, centerX-fontLarge.stringWidth(countdownString)*.5, height*.83 + fontLarge.stringHeight("3")*.75);
+
         if(elapsedMillis < stateBeginTime + 6000){
             float fader = (elapsedMillis - (stateBeginTime+5000)) / 1000.0;
             if(fader > 0)
@@ -408,40 +347,18 @@ void AgentView::draw(ProgramState state, NetworkState networkState, long elapsed
                 fontTiny.drawString("WATCH YOUR AGENTS CLOSELY", centerX - fontTiny.stringWidth("WATCH YOUR AGENTS CLOSELY") * .5, height * .2);
             }
         }
-        if(elapsedMillis > stateBeginTime + 7000){
-            countdownString = "";
-        }
-        else if(elapsedMillis > stateBeginTime + 6000){
-            float fader = (elapsedMillis - (stateBeginTime+6000)) / 1000.0;
-            ofSetColor(255, (1-fader) * 255);
-            countdownString = "1";
-        }
-        else if(elapsedMillis > stateBeginTime + 5000){
-            // FADER taken care of during REMEMBER block
-            countdownString = "2";
-        }
-        else if(elapsedMillis > stateBeginTime + 4000){
-            float fader = (elapsedMillis - (stateBeginTime+4000)) / 1000.0;
-            ofSetColor(255, (1-fader) * 255);
-            countdownString = "3";
-        }
-        else {
-            countdownString = "";
-        }
-        fontLarge.drawString(countdownString, centerX-fontLarge.stringWidth(countdownString)*.5, height*.75 + fontLarge.stringHeight("3"));
     }
     else if(state == StateTurnScramble){
         static int count = 0;
         count++;
         if(count >= 7) count = 0;
-        font.drawString(scrambleStrings[count], centerX-font.stringWidth(scrambleStrings[count])*.5, height*.83-font.stringHeight(scrambleStrings[count])*.5);
+        font.drawString(scrambleStrings[count], centerX-font.stringWidth(scrambleStrings[count])*.5, height*.83+font.stringHeight(scrambleStrings[count])*.5);
     }
     else if(state == StateTurnGesture){
-        if(!controller->isSpy)
-            font.drawString(controller->mainMessage, centerX-font.stringWidth(controller->mainMessage)*.5, height*.83+font.stringHeight(controller->mainMessage)*.75);
+
     }
     else if(state == StateTurnComplete){
-//        font.drawString("COMPLETE", centerX-font.stringWidth("COMPLETE")*.5, height*.83-font.stringHeight("COMPLETE")*.5);
+
     }
     else if(state == StateDecide){
         
@@ -465,14 +382,33 @@ void AgentView::draw(ProgramState state, NetworkState networkState, long elapsed
     }
     else if(state == StateGameOver){
         if (controller->mainMessage.compare("WIN") == 0) {
-            font.drawString("GOT 'EM", centerX-font.stringWidth("GOT 'EM")*.5, height*.83-font.stringHeight("GOT 'EM")*.5);
+
             float diameter = width*.75;
+            if(elapsedMillis < stateBeginTime + 500){
+                float speed = 7; // speed to progress through animation curve
+                float time = (elapsedMillis-stateBeginTime)/500.0 * speed;
+                float curve = cosf(time-PI)/(9*powf(2, time-PI)) + 1;
+                diameter *= curve;
+                
+                float shrinking = width*.75 * (1 - (elapsedMillis-stateBeginTime)/250.0);
+                if(shrinking < 1) shrinking = 1;
+                ofSetColor(255, 255);
+                circleShadow.draw(centerX, centerY, shrinking, shrinking);
+                ofSetColor(primaries[primaryColor]);
+                circleWhite.draw(centerX, centerY, shrinking*.83, shrinking*.83);
+                ofSetColor(255, 255);
+                avatars[controller->avatarSelf].draw(centerX, centerY, shrinking*.625, shrinking*.625);
+
+            }
             ofSetColor(255, 255);
             circleShadow.draw(centerX, centerY, diameter, diameter);
             ofSetColor(primaries[controller->spyColor-1]);
             circleWhite.draw(centerX, centerY, diameter*.83, diameter*.83);
             ofSetColor(255, 255);
             avatars[controller->spyAvatar].draw(centerX, centerY, diameter*.625, diameter*.625);
+        
+            font.drawString("GOT 'EM", centerX-font.stringWidth("GOT 'EM")*.5, height*.83-font.stringHeight("GOT 'EM")*.5);
+
         }
         else if (controller->mainMessage.compare("CAPTURED") == 0) {  // same as WIN, but this means you were the double agent
             font.drawString("CAPTURED", centerX-font.stringWidth("CAPTURED")*.5, height*.83-font.stringHeight("CAPTURED")*.5);
@@ -562,6 +498,7 @@ void AgentView::draw(ProgramState state, NetworkState networkState, long elapsed
     }
 
     // CLOCK DIAL
+    // AND GESTURE TEXT
     if(state == StateTurnScramble){
         float length = width*.425;
         if(elapsedMillis < stateBeginTime + 250){
@@ -572,12 +509,26 @@ void AgentView::draw(ProgramState state, NetworkState networkState, long elapsed
         ofSetLineWidth(20);
         ofSetColor(255, 255);
         ofLine(centerX, centerY, centerX, centerY-length);
+        ofSetLineWidth(0);
+        ofCircle(centerX, centerY-length, 7);
     }
     else if(state == StateTurnGesture){
         float turnTime = PI*2*(elapsedMillis-stateBeginTime)/(float)ACTION_TIME;
         ofSetLineWidth(20);
         ofSetColor(255, 255);
-        ofLine(centerX, centerY, centerX+sinf(turnTime)*width*.425, centerY-cosf(turnTime)*width*.425);
+        float endX = centerX+sinf(turnTime)*width*.425;
+        float endY = centerY-cosf(turnTime)*width*.425;
+        ofLine(centerX, centerY, endX, endY);
+        ofSetLineWidth(0);
+        ofCircle(endX, endY, 7);
+        
+        // GESTURE TEXT
+        float lineHeight = font.stringHeight(controller->mainMessage)*.75;
+        if(controller->mainMessage.find('\n') != -1)
+            lineHeight = 0;
+        if(!controller->isSpy)
+            font.drawString(controller->mainMessage, centerX-font.stringWidth(controller->mainMessage)*.5, height*.83+lineHeight);
+
     }
     else if(state == StateTurnComplete) {
         float length = width*.425;
@@ -589,6 +540,8 @@ void AgentView::draw(ProgramState state, NetworkState networkState, long elapsed
             ofSetLineWidth(20);
             ofSetColor(255, 255);
             ofLine(centerX, centerY, centerX, centerY-length);
+            ofSetLineWidth(0);
+            ofCircle(centerX, centerY-length, 7);
         }
     }
     // END CLOCK DIAL
@@ -603,297 +556,4 @@ void AgentView::draw(ProgramState state, NetworkState networkState, long elapsed
         ofSetColor(255, 255);
         avatars[controller->avatarSelf].draw(centerX, centerY, diameter*.625, diameter*.625);
     }
-    
-    
-    // white bar at bottom
-    //ofSetColor(primaries[complementaries[primaryColor*3+0]]);
-//    ofSetColor(255, 255, 255);
-//    ofDrawPlane(width*.5, height-125, width, 250);
-    
-//    if (sta == GameStatePlaying || gameState == GameStateDeciding || gameState == GameStateGameOver) {
-//            
-//            ofSetColor(255, 255, 255, 255);
-//            ofEnableBlendMode( OF_BLENDMODE_ALPHA );
-//            
-//            ofEnableAlphaBlending();
-//            
-//            drawInGameBackground();
-//            
-//            ofSetLineWidth(3.);
-//            
-//            // for drawing a circle path
-//            float outerRadius;
-//            int resolution;
-//            float deltaAngle;
-//            float angle;
-//            ////////////////////////////////////////////////////////
-//            // break out
-//            if(currentTurn > 1){
-//                for(int i = 1; i < currentTurn; i++){
-//                    ofSetColor(primaries[complementaries[primaryColor*3+(i-1)]]);
-//                    //ofSetColor(6, 140, 210, 100);   // blue motion shape
-//                    //ofSetColor(74,193,255, 50); // blue motion shape border
-//                    ofFill();
-//                    ofBeginShape();
-//                    outerRadius = centerX*.55;
-//                    deltaAngle = TWO_PI / (float)SENSOR_DATA_ARRAY_SIZE;
-//                    angle = 0;
-//                    float turnProgress = 1.0;
-//                    for(int i = 0; i < SENSOR_DATA_ARRAY_SIZE; i++){
-//                        if((float)i/SENSOR_DATA_ARRAY_SIZE < turnProgress){
-//                            float x = centerX + outerRadius * sin(angle) * controller->recordedSensorData[(i-1)*SENSOR_DATA_ARRAY_SIZE + i];
-//                            float y = centerY + outerRadius * -cos(angle) * controller->recordedSensorData[(i-1)*SENSOR_DATA_ARRAY_SIZE + i];
-//                            ofVertex(x,y);
-//                            angle += deltaAngle;
-//                        }
-//                    }
-//                    ofEndShape();
-//                }
-//            }
-//            ////////////////////////////////////////////////////////
-//            
-//            if(turnState == TurnStateAction || turnState == TurnStateActionSuccess || turnState == TurnStateWaiting){
-//                ofSetColor(primaries[complementaries[primaryColor*3+(currentTurn-1)]]);
-//                //ofSetColor(6, 140, 210, 100);   // blue motion shape
-//                //ofSetColor(74,193,255, 50); // blue motion shape border
-//                ofFill();
-//                ofBeginShape();
-//                outerRadius = centerX*.55;
-//                deltaAngle = TWO_PI / (float)SENSOR_DATA_ARRAY_SIZE;
-//                angle = 0;
-//                float turnProgress = (float)(ofGetElapsedTimeMillis() - controller->turnTime) / ACTION_TIME;   // from 0 to 1
-//                for(int i = 0; i < SENSOR_DATA_ARRAY_SIZE; i++){
-//                    if((float)i/SENSOR_DATA_ARRAY_SIZE < turnProgress){
-//                        float x = centerX + outerRadius * sin(angle) * controller->recordedSensorData[(currentTurn-1)*SENSOR_DATA_ARRAY_SIZE + i];
-//                        float y = centerY + outerRadius * -cos(angle) * controller->recordedSensorData[(currentTurn-1)*SENSOR_DATA_ARRAY_SIZE + i];
-//                        ofVertex(x,y);
-//                        angle += deltaAngle;
-//                    }
-//                }
-//                ofEndShape();
-//
-//            }
-//            ofSetColor(255, 255, 255,255);
-//            
-//            insideCircle.draw(centerX, centerY);
-//            if(gameState == GameStateDeciding){
-//                ofSetColor(primaries[complementaries[primaryColor*3+((currentTurn+1)%3)]]);  // modulus to vary color
-//                fingerPrint.draw(centerX, centerY,insideCircle.width*.5, insideCircle.height*.5);
-//            }
-//            
-//            if (( gameState == GameStatePlaying && !controller->preGameCountdownSequence ) || gameState == GameStateDeciding || gameState == GameStateGameOver){
-//                ofNoFill();
-//                if(turnState == TurnStateReceivingScrambled || turnState == TurnStateAction || gameState == GameStateDeciding)
-//                    ofSetColor(primaries[complementaries[primaryColor*3+((currentTurn+1)%3)]]);  // modulus to vary color
-//                else
-//                    ofSetColor(primaries[primaryColor]);
-//                ofBeginShape();
-//                outerRadius = centerX*.52;
-//                resolution = 64;
-//                deltaAngle = TWO_PI / (float)resolution;
-//                angle = 0;
-//                float roundProgress = (float)currentTurn / NUM_TURNS;
-//                for(int i = 0; i <= resolution; i++){
-//                    if((float)i/resolution <= roundProgress){
-//                        float x = centerX + outerRadius * sin(angle);
-//                        float y = centerY + outerRadius * -cos(angle);
-//                        ofVertex(x,y);
-//                        angle += deltaAngle;
-//                    }
-//                }
-//                ofEndShape();
-//            }
-//            
-//            ofDisableAlphaBlending();
-//            
-//            // BACK TO BUSINESS
-//            
-//            if (controller->mainMessage.length()){
-//                ofSetColor(255,255,255,255);
-//                
-//                if (controller->animatedScrambleFont) {
-//                    //if(rand()%2 == 0){
-//                    int index = rand()%4;
-//                    spymess[index] = rand()%23+65;
-//                    //}
-//                    font.drawString(ofToString(spymess),ofGetWidth()/2 - font.stringWidth(spymess)/2.,ofGetHeight()/2 + font.stringHeight(ofToString(spymess))/2.);
-//                }
-//                else if (controller->useScrambledText){
-//                    font.drawString(ofToString(spymess),ofGetWidth()/2 - font.stringWidth(spymess)/2.,ofGetHeight()/2 + font.stringHeight(ofToString(spymess))/2.);
-//                }
-//                else
-//                    font.drawString(controller->mainMessage,ofGetWidth()/2 - font.stringWidth(controller->mainMessage)/2.,ofGetHeight()/2 + font.stringHeight(controller->mainMessage)/2.);
-//            }
-//
-//    }
-//    
-//    if (!isServer && !isClient) {  // if not server or client
-//        drawLoginScreen(loginState);
-//    }
-//    ofSetColor(255, 255);
-//    if(gameState == GameStateLogin){
-//        lowerTextLine1 = "ONLY 1 HOST IS REQUIRED";
-//        lowerTextLine2 = "";
-//        lowerTextLine3 = "";
-//    }
-//    if(loginState == LoginStateChoose){
-//        fontLarge.drawString("DOUBLE AGENT", centerX-fontLarge.stringWidth("DOUBLE AGENT")*.5, 125);
-//    }
-//    
-//    if(gameState == GameStateReadyRoom){
-//        if (isServer) {
-//            lowerTextLine1 = "YOU ARE THE HOST";
-//            lowerTextLine2 = controller->getCodeFromIp();
-//            lowerTextLine3 = "Share this code for others to log in";
-//        }
-//        else {
-//            lowerTextLine1 = "YOU ARE CONNECTED";
-//            lowerTextLine2 = "to host: " + controller->getCodeFromInt(controller->loginCode);
-//            lowerTextLine3 = "Waiting for host to start the game";
-//        }
-//    }
-//    
-//    if(gameState == GameStatePlaying){
-//        if(controller->preGameCountdownSequence){
-//            if(step > 6){
-//                lowerTextLine1 = "AGENT ID";
-//                lowerTextLine2 = "AGENT";
-//                lowerTextLine3 = "Purpose: to identify the double agent";
-//            }
-//            else{
-//                lowerTextLine1 = lowerTextLine2 = lowerTextLine3 = "";
-//            }
-//        }
-//        else{
-//            lowerTextLine1 = "AGENT ID";
-//            lowerTextLine2 = "AGENT";
-//            lowerTextLine3 = "Purpose: to identify the double agent";
-//        }
-//    }
-//    if(gameState == GameStateDeciding){
-//        lowerTextLine1 = "TARGET";
-//        lowerTextLine2 = "DOUBLE AGENT";
-//        lowerTextLine3 = "Select operative identified as double agent";
-//    }
-//    if(gameState == GameStateGameOver){
-//        lowerTextLine1 = "MISSION";
-//        if(strcmp(controller->mainMessage.c_str(), "SPY CAPTURED!") == 0){
-//            lowerTextLine2 = "SUCCESS";
-//            lowerTextLine3 = "You have sucessfully uncovered the double agent";
-//        }
-//        else if(strcmp(controller->mainMessage.c_str(), "NOPE!") == 0){
-//            lowerTextLine2 = "FAIL";
-//            lowerTextLine3 = "the double agent got away";
-//        }
-//    }
-//    
-//    ofSetColor(0, 0, 0, 255);
-//    fontSmall.drawString(lowerTextLine1, 60, centerY+centerY*.66);
-//    ofSetColor(0, 0, 0, 255);
-//    fontSmall.drawString(lowerTextLine2, 60, centerY+centerY*.66+40);
-//    fontSmall.drawString(lowerTextLine3, 60, centerY+centerY*.66+80);
-//    
-//    if (controller->connectedAgents > 1){   // CONNECTED AGENTS
-//        string count = connectedAgentsStrings[controller->connectedAgents];//ofToString(connectedAgents);
-//        ofSetColor(0,0,0);
-//        font.drawString(count, centerX-font.stringWidth(count)/2.,ofGetHeight() - font.stringHeight(count));
-//    }
-}
-
-//void AgentView::drawLoginScreen(LoginStateState loginState) {
-//    
-//    string hostString = "HOST";
-//    string clientString = "JOIN";
-//    string backString = "< BACK";
-//    string thirdString;
-//    
-//    ofSetColor(255,255,255);
-//    
-//    ofEnableAlphaBlending();
-//    
-//    switch (loginState) {
-//        case LoginStateChoose:
-//            font.drawString(hostString,ofGetWidth()/2 - font.stringWidth(hostString)/2.,ofGetHeight()*.4 - font.stringHeight(hostString)/2.);
-//            font.drawString(clientString,ofGetWidth()/2 - font.stringWidth(clientString)/2.,ofGetHeight()*.6 - font.stringHeight(clientString)/2.);
-//            break;
-//            
-//        case LoginStateServer:
-//            hostString = "JOIN CODE";
-//            clientString = controller->getCodeFromIp();
-//            fontMedium.drawString(backString,fontMedium.stringWidth(backString)*.35,ofGetHeight()*.1 - fontMedium.stringHeight(backString)/2.);
-//            font.drawString(hostString,ofGetWidth()/2 - font.stringWidth(hostString)/2.,ofGetHeight()*.4 - font.stringHeight(hostString)/2.);
-//            font.drawString(clientString,ofGetWidth()/2 - font.stringWidth(clientString)/2.,ofGetHeight()*.6 - font.stringHeight(clientString)/2.);
-//            break;
-//            
-//        case LoginStateClient:
-//            hostString = "CODE";
-//            clientString = controller->getCodeFromInt(controller->loginCode);
-//            fontMedium.drawString(backString,fontMedium.stringWidth(backString)*.35,ofGetHeight()*.1 - fontMedium.stringHeight(backString)/2.);
-//            font.drawString(hostString,ofGetWidth()/2 - font.stringWidth(hostString)/2.,ofGetHeight()*.2 - font.stringHeight(hostString)/2.);
-//            font.drawString(clientString,ofGetWidth()/2 - font.stringWidth(clientString)/2.,ofGetHeight()*.475 - font.stringHeight(clientString)/2.);
-//            increment.draw(width*.31, height*.325, width*.1, width*.1);
-//            increment.draw(width*.5, height*.325, width*.1, width*.1);
-//            increment.draw(width*.7, height*.325, width*.1, width*.1);
-//            decrement.draw(width*.31, height*.525, width*.1, width*.1);
-//            decrement.draw(width*.5, height*.525, width*.1, width*.1);
-//            decrement.draw(width*.7, height*.525, width*.1, width*.1);
-//            hostString = "JOIN";
-//            font.drawString(hostString,ofGetWidth()/2 - font.stringWidth(hostString)/2.,ofGetHeight()*.75 - font.stringHeight(hostString)/2.);
-//            break;
-//            
-//        case LoginStateConnecting:
-//            hostString = "CONNECTING TO";
-//            clientString = controller->getCodeFromInt(controller->loginCode);
-//            font.drawString(hostString,ofGetWidth()/2 - font.stringWidth(hostString)/2.,ofGetHeight()*.4 - font.stringHeight(hostString)/2.);
-//            font.drawString(clientString,ofGetWidth()/2 - font.stringWidth(clientString)/2.,ofGetHeight()*.6 - font.stringHeight(clientString)/2.);
-//            break;
-//            
-//        case LoginStateFailed:
-//            hostString = "BACK";
-//            clientString = "CONNECTION";
-//            thirdString = "FAILED";
-//            font.drawString(hostString,ofGetWidth()/2 - font.stringWidth(hostString)/2.,ofGetHeight()*.15 - font.stringHeight(hostString)/2.);
-//            font.drawString(clientString,ofGetWidth()/2 - font.stringWidth(clientString)/2.,ofGetHeight()*.5 - font.stringHeight(clientString)/2.);
-//            font.drawString(thirdString,ofGetWidth()/2 - font.stringWidth(thirdString)/2.,ofGetHeight()*.6 - font.stringHeight(thirdString)/2.);
-//            break;
-//            
-//        case LoginStateServerQuit:
-//            hostString = "BACK";
-//            clientString = "HOST STOPPED";
-//            thirdString = "THE GAME";
-//            font.drawString(hostString,ofGetWidth()/2 - font.stringWidth(hostString)/2.,ofGetHeight()*.15 - font.stringHeight(hostString)/2.);
-//            font.drawString(clientString,ofGetWidth()/2 - font.stringWidth(clientString)/2.,ofGetHeight()*.5 - font.stringHeight(clientString)/2.);
-//            font.drawString(thirdString,ofGetWidth()/2 - font.stringWidth(thirdString)/2.,ofGetHeight()*.6 - font.stringHeight(thirdString)/2.);
-//            break;
-//            
-//        case LoginStateNoIP:
-//            hostString = "NO ADDRESS";
-//            clientString = "CHECK WIFI ?";
-//            fontMedium.drawString(backString,fontMedium.stringWidth(backString)*.35,ofGetHeight()*.1 - fontMedium.stringHeight(backString)/2.);
-//            font.drawString(hostString,ofGetWidth()/2 - font.stringWidth(hostString)/2.,ofGetHeight()*.4 - font.stringHeight(hostString)/2.);
-//            font.drawString(clientString,ofGetWidth()/2 - font.stringWidth(clientString)/2.,ofGetHeight()*.6 - font.stringHeight(clientString)/2.);
-//            break;
-//            
-//        default:
-//            break;
-//    }
-//    
-//    ofDisableAlphaBlending();
-//}
-
-void AgentView::drawInGameBackground(){
-    ofSetColor(255, 255, 255, 75);
-    reticleOutline.draw(centerX, centerY);
-    ofPushMatrix();
-    float compassAngle = atan2f(controller->orientation.d, controller->orientation.e);
-    ofTranslate(centerX, centerY);
-    ofRotate(compassAngle*180/PI);
-    reticleCompass.draw(0,0);
-    ofPopMatrix();
-    ofPushMatrix();
-    float reticleInsideAngle = asinf(controller->orientation.f);
-    ofTranslate(centerX, centerY);
-    ofRotate(reticleInsideAngle*180/PI);
-    reticleInside.draw(0, 0);
-    ofPopMatrix();
 }

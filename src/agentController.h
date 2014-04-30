@@ -79,6 +79,8 @@ private:
     // increment NUM_GESTURES in AgentCommon.h
     // in execute(), assign it to a gesture record type
     //
+    // strings programmed to be able to handle one \n, and display it properly
+    
     string      actionString[NUM_GESTURES] = {
         "NOTHING",
         "JUMP",
@@ -95,7 +97,9 @@ private:
         "RUN IN PLACE",
         "COVER YOUR EYES",
         "MAKE YOUR\nANIMAL'S SOUND",
-        "CHICKEN DANCE"};
+        "CHICKEN DANCE",
+        "TOUCH YOUR TOES"};
+    
     RecordMode  recordMode;  // gesture type, what kind of motion data to capture   // is 0 being used properly?
     bool        gestureHasOccurred(string message);     // prevent duplicating gestures per round
     string      previousActions[NUM_TURNS];  // prevent repeating actions per round, history of moves. gets cleared every round start
