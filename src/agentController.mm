@@ -142,7 +142,7 @@ void agentController::updateTCP() {
     		isClient = false;
     		connectedAgents = 0;
             networkState = NetworkLostConnection;
-            updateState(StateWelcomeScreen);
+            updateState(StateConnectionScreen);
     		return;
     	}
         
@@ -380,24 +380,27 @@ void agentController::execute(string gesture){
     char mess[128];
     strcpy(mess, gesture.c_str());
     
-    if (strcmp(mess, "TOUCH SCREEN") == 0) {
+    if (strcmp(mess, "TOUCH SCREEN") == 0 ||
+        strcmp(mess, "TOUCH SCREEN\nWITH NOSE")) {
         recordMode = RecordModeTouch;
     }
-    else if (strcmp(mess, "SHAKE PHONE") == 0 ||
+    else if (strcmp(mess, "SHAKE ME") == 0 ||
              strcmp(mess, "JUMP") == 0 ||
              strcmp(mess, "FREEZE") == 0 ||
              strcmp(mess, "RUN IN PLACE") == 0 ||
-             strcmp(mess, "CROUCH") == 0) {
+             strcmp(mess, "CROUCH") == 0 ||
+             strcmp(mess, "CHICKEN DANCE")) {
         recordMode = RecordModeAccel;
     }
     else if (strcmp(mess, "SPIN") == 0 ||
-             strcmp(mess, "TOUCH PHONE\nWITH NOSE") ||
+             strcmp(mess, "COVER YOUR EYES") ||
              strcmp(mess, "RAISE\nA HAND") == 0) {
         recordMode = RecordModeOrientation;
     }
     else if (strcmp(mess, "HIGH FIVE\nNEIGHBOR") == 0 ||
              strcmp(mess, "POINT AT\nAN AGENT") == 0 ||
-             strcmp(mess, "STAND ON\nONE LEG") == 0) {
+             strcmp(mess, "STAND ON\nONE LEG") == 0 ||
+             strcmp(mess, "MAKE YOUR\nANIMAL'S SOUND")) {
         recordMode = RecordModeNothing;
     }
     else {
@@ -547,7 +550,7 @@ void agentController::update() {
         }
     }
     else if(state == StateCountdown){
-        if(elapsedMillis > stateBeginTime + 5000){
+        if(elapsedMillis > stateBeginTime + 7000){
             if (isServer){
                 // setup new game
                 for(int i = 0; i < NUM_TURNS; i++)
@@ -581,7 +584,7 @@ void agentController::update() {
             updateState(StateTurnComplete);
     }
     else if(state == StateTurnComplete){    // initiated by server sendMessage("stateTurnComplete")
-        if(isServer && elapsedMillis > stateBeginTime + 3000){
+        if(isServer && elapsedMillis > stateBeginTime + 4000){
             if(turnNumber < NUM_TURNS){
                 serverInitiateRound();
                 updateState(StateTurnScramble);
@@ -1000,28 +1003,28 @@ string agentController::getCodeFromIp(){
     
     std::vector<std::string> result;
     result = ofSplitString(localIP,".");
+    char code[6];
+    // spaces inbetween 3 number characters
+    code[1] = ' ';
+    code[3] = ' ';
+    if (result[3].length() < 2){
+        const char* last = result[3].c_str();
+        code[0] = '0';
+        code[2] = '0';
+        code[4] = last[0];
+    }
     if (result[3].length() < 3){
-        char code[6];
-        // spaces inbetween 3 number characters
-        code[1] = ' ';
-        code[3] = ' ';
         const char* last = result[3].c_str();
         code[0] = '0';
         code[2] = last[0];
         code[4] = last[1];
-        code[5] = '\0';
-        return string(code);
     }
     else {
-        char code[6];
-        // spaces inbetween 3 number characters
-        code[1] = ' ';
-        code[3] = ' ';
         const char* last = result[3].c_str();
         code[0] = last[0];
         code[2] = last[1];
         code[4] = last[2];
-        code[5] = '\0';
-        return string(code);
     }
+    code[5] = '\0';
+    return string(code);
 }

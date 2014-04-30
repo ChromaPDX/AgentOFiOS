@@ -74,18 +74,28 @@ private:
 // DOUBLE AGENT GAME
     // cover your eyes
     // make your animal's sound
-    string      actionString[NUM_GESTURES] = {  "NOTHING",
-                                                "JUMP",
-                                                "TOUCH SCREEN",
-                                                "SHAKE PHONE",
-                                                "SPIN",
-                                                "HIGH FIVE\nNEIGHBOR",
-                                                "POINT AT\nAN AGENT",
-                                                "FREEZE","CROUCH",
-                                                "STAND ON\nONE LEG",
-                                                "TOUCH PHONE\nWITH NOSE",
-                                                "RAISE\nA HAND",
-                                                "RUN IN PLACE"};
+    
+    // TO ADD MORE GESTURES:
+    // increment NUM_GESTURES in AgentCommon.h
+    // in execute(), assign it to a gesture record type
+    //
+    string      actionString[NUM_GESTURES] = {
+        "NOTHING",
+        "JUMP",
+        "TOUCH SCREEN",
+        "SHAKE ME",
+        "SPIN",
+        "HIGH FIVE\nNEIGHBOR",
+        "POINT AT\nAN AGENT",
+        "FREEZE",
+        "CROUCH",
+        "STAND ON\nONE LEG",
+        "TOUCH SCREEN\nWITH NOSE",
+        "RAISE\nA HAND",
+        "RUN IN PLACE",
+        "COVER YOUR EYES",
+        "MAKE YOUR\nANIMAL'S SOUND",
+        "CHICKEN DANCE"};
     RecordMode  recordMode;  // gesture type, what kind of motion data to capture   // is 0 being used properly?
     bool        gestureHasOccurred(string message);     // prevent duplicating gestures per round
     string      previousActions[NUM_TURNS];  // prevent repeating actions per round, history of moves. gets cleared every round start

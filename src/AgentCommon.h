@@ -12,7 +12,7 @@
 
 #define NUM_MSG_STRINGS 20
 #define PORT 3456
-#define NUM_GESTURES 13
+#define NUM_GESTURES 16
 #define NUM_PLACES 8
 #define NUM_TURNS 3  // per round
 #define ACTION_TIME 3000  // 3 seconds to execute action

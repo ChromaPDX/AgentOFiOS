@@ -151,17 +151,29 @@ void AgentView::draw(ProgramState state, NetworkState networkState, long elapsed
         ofSetColor(255, 255);
         lightShadow.draw(centerX, centerY);
         fontLarge.drawString("DOUBLE", centerX - fontLarge.stringWidth("DOUBLE")/2., height*.2);
-        fontLarge.drawString("AGENT",  centerX - fontLarge.stringWidth("AGENT")/2., height*.2 + fontLarge.stringHeight("AGENT"));
-        fontTiny.drawString("GAME OF RIDICULOUS GESTURES", centerX - fontTiny.stringWidth("GAME OF RIDICULOUS GESTURES")/2., height*.2 + fontLarge.stringHeight("AGENT")*2.0);
-        fontLarge.drawString("BEGIN", centerX - fontLarge.stringWidth("BEGIN")/2., height*.75 - fontLarge.stringHeight("BEGIN")*.5);
+        fontLarge.drawString("AGENT",  centerX - fontLarge.stringWidth("AGENT")/2., height*.2 + fontLarge.stringHeight("AGENT")*1.25);
+        fontTiny.drawString("A GAME OF", centerX - fontTiny.stringWidth("A GAME OF")/2., height*.45);
+        fontTiny.drawString("RIDICULOUS GESTURES", centerX - fontTiny.stringWidth("RIDICULOUS GESTURES")*.5, height*.45 + fontTiny.stringHeight("AGENT")*1.5);
+
+        
+//        ofSetColor(255, 255);
+//        circleShadow.draw(centerX, height*.77, 240, 240);
+//        ofSetColor(primaries[primaryColor]);
+//        circleWhite.draw(centerX, height*.77, 200, 200);
+//        ofSetColor(255, 255);
+//        avatars[controller->avatarSelf].draw(centerX, height*.75, 150, 150);
+        fontSmall.drawString("BEGIN", centerX - fontSmall.stringWidth("BEGIN")/2.-2, height*.77 + fontSmall.stringHeight("BEGIN")*.5);
 
         ofDrawPlane(width*.5, height-50, width, 100);
         ofSetColor(0, 255);
-        wifiImage.draw(50, height - 50, 50, 50);
         string wifistr;
-        if(WIFIExist) wifistr = "WIFI connected :)";
-        else wifistr = "I need WIFI :(";
-        fontSmall.drawString(wifistr, 110, height - 50 + fontSmall.stringHeight(wifistr)*.5);
+        if(WIFIExist) wifistr = "WIFI CONNECTED";
+        else wifistr = "I NEED WIFI";
+        fontTiny.drawString(wifistr, centerX - fontTiny.stringWidth(wifistr)*.5, height - 50 + fontTiny.stringHeight(wifistr)*.5);
+        if(!WIFIExist)
+            ofSetColor(0, 66);
+        wifiImage.draw(centerX - fontTiny.stringWidth(wifistr)*.5 - 50, height - 50, 50, 50);
+
     }
     else if(state == StateConnectionScreen){
         int alpha = 255;
@@ -171,18 +183,16 @@ void AgentView::draw(ProgramState state, NetworkState networkState, long elapsed
         ofSetColor(255, alpha);
         lightShadow.draw(centerX, centerY);
         fontLarge.drawString("DOUBLE", centerX - fontLarge.stringWidth("DOUBLE")/2., height*.2);
-        fontLarge.drawString("AGENT",  centerX - fontLarge.stringWidth("AGENT")/2., height*.2 + fontLarge.stringHeight("AGENT"));
-        fontTiny.drawString("GAME OF RIDICULOUS GESTURES", centerX - fontTiny.stringWidth("GAME OF RIDICULOUS GESTURES")/2., height*.2 + fontLarge.stringHeight("AGENT")*2.0);
+        fontLarge.drawString("AGENT",  centerX - fontLarge.stringWidth("AGENT")/2., height*.2 + fontLarge.stringHeight("AGENT")*1.25);
         font.drawString("HOST", width*.3 - font.stringWidth("HOST")/2., height*.6 - font.stringHeight("HOST")/2.);
         font.drawString("JOIN", width*.7 - font.stringWidth("JOIN")/2., height*.6 - font.stringHeight("JOIN")/2.);
        
-
         ofSetColor(255, 255);
-        circleShadow.draw(centerX, height*.75, 240, 240);
+        circleShadow.draw(centerX, height*.77, 235, 235);
         ofSetColor(primaries[primaryColor]);
-        circleWhite.draw(centerX, height*.75, 200, 200);
+        circleWhite.draw(centerX, height*.77, 200, 200);
         ofSetColor(255, 255);
-        avatars[controller->avatarSelf].draw(centerX, height*.75, 150, 150);
+        avatars[controller->avatarSelf].draw(centerX, height*.77, 150, 150);
 
         float yPos = height-50;
         if(transitionActive){
@@ -215,16 +225,22 @@ void AgentView::draw(ProgramState state, NetworkState networkState, long elapsed
         
 //        if(networkState == NetworkJoinAttempt){
 
-        string clientString = controller->getCodeFromInt(controller->loginCode);
+        const int NUDGE = 5;  // ofStringWidth()*.5 is still a little off from center
         
+        string clientString = controller->getCodeFromInt(controller->loginCode);
+        string digit1 = clientString.substr(0,1);
+        string digit2 = clientString.substr(2,1);
+        string digit3 = clientString.substr(4,1);
         ofSetColor(255, 255);
         fontLarge.drawString("JOIN",  centerX - fontLarge.stringWidth("JOIN")*.5, height*.66 + fontLarge.stringHeight("JOIN")*.5);
-        fontTiny.drawString("JOIN CODE", width*.5 - fontTiny.stringWidth("JOIN CODE")*.5, fontTiny.stringHeight("JOIN CODE")*2.5);
-        fontMedium.drawString("QUIT", fontMedium.stringWidth("QUIT")*.1, height - fontMedium.stringHeight("QUIT")*.5);
-        fontLarge.drawString(clientString,width/2. - fontLarge.stringWidth(clientString)/2.,height*.425 - fontLarge.stringHeight(clientString)/2.);
-        increment.draw(width*.25, height*.2, width*.2, width*.2);
-        increment.draw(width*.5, height*.2, width*.2, width*.2);
-        increment.draw(width*.75, height*.2, width*.2, width*.2);
+        fontMedium.drawString("QUIT", fontMedium.stringWidth("QUIT")*.15, height - fontMedium.stringHeight("QUIT")*.5);
+//        fontLarge.drawString(clientString, width/2. - fontLarge.stringWidth(clientString)/2.,height*.425 - fontLarge.stringHeight(clientString)/2.);
+        fontLarge.drawString(digit1, width*.25 - fontLarge.stringWidth(digit1)*.5 - NUDGE, height*.42 - fontLarge.stringHeight(digit1)*.5);
+        fontLarge.drawString(digit2, width*.5 - fontLarge.stringWidth(digit2)*.5 - NUDGE, height*.42 - fontLarge.stringHeight(digit2)*.5);
+        fontLarge.drawString(digit3, width*.75 - fontLarge.stringWidth(digit3)*.5 - NUDGE, height*.42 - fontLarge.stringHeight(digit3)*.5);
+        increment.draw(width*.25, height*.21, width*.2, width*.2);
+        increment.draw(width*.5, height*.21, width*.2, width*.2);
+        increment.draw(width*.75, height*.21, width*.2, width*.2);
         decrement.draw(width*.25, height*.45, width*.2, width*.2);
         decrement.draw(width*.5, height*.45, width*.2, width*.2);
         decrement.draw(width*.75, height*.45, width*.2, width*.2);
@@ -293,17 +309,17 @@ void AgentView::draw(ProgramState state, NetworkState networkState, long elapsed
         
         if(isServer){
             ofSetColor(255, 255);
-            circleShadow.draw(centerX, height*.75, 240, 240);
+            circleShadow.draw(centerX, height*.77, 235, 235);
             ofSetColor(primaries[primaryColor]);
-            circleWhite.draw(centerX, height*.75, 200, 200);
+            circleWhite.draw(centerX, height*.77, 200, 200);
             ofSetColor(255, 255);
-            avatars[controller->avatarSelf].draw(centerX, height*.75, 150, 150);
+            avatars[controller->avatarSelf].draw(centerX, height*.77, 150, 150);
             count++;
         }
         for(int i = 0; i < 256; i++){
             if(controller->avatarIcons[i] != 0 &&  count < NUM_AVATAR_COORDS){  // todo make case for count > NUM_AVATAR_COORDS
                 ofSetColor(255, 255);
-                circleShadow.draw(avatarCoords[count*2+0], avatarCoords[count*2+1], 240, 240);
+                circleShadow.draw(avatarCoords[count*2+0], avatarCoords[count*2+1], 235, 235);
                 ofSetColor(primaries[controller->avatarColors[i]-1]);
                 circleWhite.draw(avatarCoords[count*2+0], avatarCoords[count*2+1], 200, 200);
                 ofSetColor(255, 255);
@@ -328,7 +344,7 @@ void AgentView::draw(ProgramState state, NetworkState networkState, long elapsed
             
             string clientString = controller->getCodeFromIp();
             fontTiny.drawString("JOIN CODE", width*.5 - fontTiny.stringWidth("JOIN CODE")*.5, fontTiny.stringHeight("JOIN CODE")*1.5);
-            fontLarge.drawString(clientString, width*.5 - fontLarge.stringWidth(clientString)*.5, fontLarge.stringHeight(clientString)*2);
+            fontLarge.drawString(clientString, width*.5 - fontLarge.stringWidth(clientString)*.5, fontLarge.stringHeight(clientString)*1.75);
             
             fontMedium.drawString("START", width - fontMedium.stringWidth("START")*1.1, height - fontMedium.stringHeight("START")*.5);
         }
@@ -379,25 +395,40 @@ void AgentView::draw(ProgramState state, NetworkState networkState, long elapsed
 
         ofSetColor(255, 255);
         string countdownString;
-        if(elapsedMillis > stateBeginTime + 5000){
+        if(elapsedMillis < stateBeginTime + 6000){
+            float fader = (elapsedMillis - (stateBeginTime+5000)) / 1000.0;
+            if(fader > 0)
+                ofSetColor(255, (1-fader) * 255);
+            else
+                ofSetColor(255, 255);
+            if(elapsedMillis > stateBeginTime + 2000){
+                fontMedium.drawString("REMEMBER", centerX - fontMedium.stringWidth("REMEMBER")*.5, height*.15);
+            }
+            if(elapsedMillis > stateBeginTime + 3000){
+                fontTiny.drawString("WATCH YOUR AGENTS CLOSELY", centerX - fontTiny.stringWidth("WATCH YOUR AGENTS CLOSELY") * .5, height * .2);
+            }
+        }
+        if(elapsedMillis > stateBeginTime + 7000){
             countdownString = "";
         }
-        else if(elapsedMillis > stateBeginTime + 4000){
+        else if(elapsedMillis > stateBeginTime + 6000){
+            float fader = (elapsedMillis - (stateBeginTime+6000)) / 1000.0;
+            ofSetColor(255, (1-fader) * 255);
             countdownString = "1";
         }
-        else if(elapsedMillis > stateBeginTime + 3000){
+        else if(elapsedMillis > stateBeginTime + 5000){
+            // FADER taken care of during REMEMBER block
             countdownString = "2";
         }
-        else if(elapsedMillis > stateBeginTime + 2000){
+        else if(elapsedMillis > stateBeginTime + 4000){
+            float fader = (elapsedMillis - (stateBeginTime+4000)) / 1000.0;
+            ofSetColor(255, (1-fader) * 255);
             countdownString = "3";
         }
-        else if(elapsedMillis > stateBeginTime + 1000){
+        else {
             countdownString = "";
         }
-        else if(elapsedMillis > stateBeginTime){
-            countdownString = "";
-        }
-        fontLarge.drawString(countdownString, centerX-fontLarge.stringWidth(countdownString)*.5, fontLarge.stringHeight(countdownString)*2.5);
+        fontLarge.drawString(countdownString, centerX-fontLarge.stringWidth(countdownString)*.5, height*.75 + fontLarge.stringHeight("3"));
     }
     else if(state == StateTurnScramble){
         static int count = 0;
@@ -430,7 +461,7 @@ void AgentView::draw(ProgramState state, NetworkState networkState, long elapsed
         font.drawString("WHO IS IT?", centerX-font.stringWidth("WHO IS IT?")*.5, height*.2-font.stringHeight("WHO IS IT?")*.5);
         ofDrawPlane(width*.5, yPos, width, 100);
         ofSetColor(0, 255);
-        fontSmall.drawString("turn screen towards crowd", centerX - fontSmall.stringWidth("turn screen towards crowd")*.5, yPos + fontSmall.stringHeight("turn screen towards crowd")*.5);
+        fontTiny.drawString("TURN SCREEN TOWARD PLAYERS", centerX - fontTiny.stringWidth("TURN SCREEN TOWARD PLAYERS")*.5, yPos + fontTiny.stringHeight("TURN SCREEN TOWARD PLAYERS")*.5);
     }
     else if(state == StateGameOver){
         if (controller->mainMessage.compare("WIN") == 0) {
